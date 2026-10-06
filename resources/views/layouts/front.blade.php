@@ -14,6 +14,11 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light static-top">
     <div class="container">
         <a class="navbar-brand" href="{{ route('home') }}"><i class="bi bi-recycle text-success"></i> {{ config('app.name') }}</a>
+        <div class="navbar-nav me-auto ms-3">
+            <a class="nav-link {{ request()->routeIs('ateliers.*') ? 'active fw-bold text-success' : '' }}" href="{{ route('ateliers.index') }}">
+                <i class="bi bi-scissors me-1"></i> Ateliers &amp; Services
+            </a>
+        </div>
         <div class="d-flex align-items-center gap-2">
             @auth
                 <span class="me-2 d-none d-md-inline text-muted">{{ auth()->user()->name }}

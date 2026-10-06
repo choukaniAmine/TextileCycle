@@ -43,6 +43,15 @@
                         <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-users"></i><p>Utilisateurs</p></a>
                     </li>
+                    <li class="nav-header text-uppercase text-xs text-muted">Module 2 — Ateliers</li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.ateliers.index') }}" class="nav-link {{ request()->routeIs('admin.ateliers.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-store"></i><p>Gestion Ateliers</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.services.index') }}" class="nav-link {{ request()->routeIs('admin.services.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-tools"></i><p>Gestion Services</p></a>
+                    </li>
                     {{-- Prochains modules : Vêtements, Réparations, Dons… --}}
                 </ul>
             </nav>

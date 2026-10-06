@@ -26,5 +26,9 @@ class DatabaseSeeder extends Seeder
         User::factory(8)->create();
         User::factory(3)->role(UserRole::Atelier)->create();
         User::factory(3)->role(UserRole::Association)->create();
+
+        $this->call([
+            AtelierSeeder::class,
+        ]);
     }
 }

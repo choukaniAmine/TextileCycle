@@ -4,8 +4,8 @@
 <div class="row">
     <div class="col-md-3 col-6"><div class="small-box bg-info"><div class="inner"><h3>{{ $total }}</h3><p>Utilisateurs</p></div><div class="icon"><i class="fas fa-users"></i></div></div></div>
     <div class="col-md-3 col-6"><div class="small-box bg-success"><div class="inner"><h3>{{ $actifs }}</h3><p>Comptes actifs</p></div><div class="icon"><i class="fas fa-user-check"></i></div></div></div>
-    <div class="col-md-3 col-6"><div class="small-box bg-warning"><div class="inner"><h3>{{ $parRole['atelier'] }}</h3><p>Ateliers</p></div><div class="icon"><i class="fas fa-cut"></i></div></div></div>
-    <div class="col-md-3 col-6"><div class="small-box bg-danger"><div class="inner"><h3>{{ $parRole['association'] }}</h3><p>Associations</p></div><div class="icon"><i class="fas fa-hands-helping"></i></div></div></div>
+    <div class="col-md-3 col-6"><div class="small-box bg-warning"><div class="inner"><h3>{{ $totalAteliers }}</h3><p>Ateliers Partenaires</p></div><div class="icon"><i class="fas fa-store"></i></div><a href="{{ route('admin.ateliers.index') }}" class="small-box-footer">Gérer <i class="fas fa-arrow-circle-right"></i></a></div></div>
+    <div class="col-md-3 col-6"><div class="small-box bg-primary"><div class="inner"><h3>{{ $totalServices }}</h3><p>Prestations / Services</p></div><div class="icon"><i class="fas fa-tools"></i></div><a href="{{ route('admin.services.index') }}" class="small-box-footer">Gérer <i class="fas fa-arrow-circle-right"></i></a></div></div>
 </div>
 <div class="card">
     <div class="card-header"><h3 class="card-title">Dernières inscriptions</h3></div>

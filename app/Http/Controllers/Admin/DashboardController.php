@@ -17,6 +17,8 @@ class DashboardController extends Controller
         return view('admin.dashboard', [
             'total' => User::count(),
             'actifs' => User::where('is_active', true)->count(),
+            'totalAteliers' => \App\Models\Atelier::count(),
+            'totalServices' => \App\Models\Service::count(),
             'parRole' => $parRole,
             'derniers' => User::latest()->take(6)->get(),
         ]);

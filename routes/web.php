@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\Route;
 // ---------- Front office ----------
 Route::get('/', [Front\HomeController::class, 'index'])->name('home');
 
+// Module 2 — Ateliers & Services (Front)
+Route::get('/ateliers', [Front\AtelierController::class, 'index'])->name('ateliers.index');
+Route::get('/ateliers/{atelier}', [Front\AtelierController::class, 'show'])->name('ateliers.show');
+
 Route::middleware('guest')->group(function () {
     Route::get('/connexion', [AuthController::class, 'showLogin'])->name('login');
     Route::post('/connexion', [AuthController::class, 'login']);
@@ -26,4 +30,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('/', Admin\DashboardController::class)->name('dashboard');
     Route::patch('users/{user}/toggle', [Admin\UserController::class, 'toggle'])->name('users.toggle');
     Route::resource('users', Admin\UserController::class)->except('show');
+
+    // Module 2 — CRUD Ateliers & Services (Admin)
+    Route::resource('ateliers', Admin\AtelierController::class);
+    Route::resource('services', Admin\ServiceController::class);
 });
