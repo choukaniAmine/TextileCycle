@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     {{-- Template back office : AdminLTE 3.2 (Bootstrap 4) --}}
     <link rel="stylesheet" href="{{ asset('templates/backoffice/css/adminlte.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/demandes.css') }}">
 </head>
 <body class="hold-transition sidebar-mini">
 <div class="wrapper">
@@ -43,7 +44,11 @@
                         <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-users"></i><p>Utilisateurs</p></a>
                     </li>
-                    {{-- Prochains modules : Vêtements, Réparations, Dons… --}}
+                    <li class="nav-item">
+    <a href="{{ route('admin.demandes.index') }}" class="nav-link {{ request()->routeIs('admin.demandes.*', 'admin.interventions.*') ? 'active' : '' }}">
+        <i class="nav-icon fas fa-cut"></i><p>Demandes</p></a>
+</li>
+               
                 </ul>
             </nav>
         </div>

@@ -6,6 +6,7 @@ use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
@@ -29,8 +30,10 @@ class User extends Authenticatable
             'is_active' => 'boolean',
         ];
     }
-
-    public function isAdmin(): bool
+public function demandes(): HasMany
+{
+    return $this->hasMany(Demande::class);
+}    public function isAdmin(): bool
     {
         return $this->role === UserRole::Admin;
     }

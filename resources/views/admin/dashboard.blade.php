@@ -6,6 +6,8 @@
     <div class="col-md-3 col-6"><div class="small-box bg-success"><div class="inner"><h3>{{ $actifs }}</h3><p>Comptes actifs</p></div><div class="icon"><i class="fas fa-user-check"></i></div></div></div>
     <div class="col-md-3 col-6"><div class="small-box bg-warning"><div class="inner"><h3>{{ $parRole['atelier'] }}</h3><p>Ateliers</p></div><div class="icon"><i class="fas fa-cut"></i></div></div></div>
     <div class="col-md-3 col-6"><div class="small-box bg-danger"><div class="inner"><h3>{{ $parRole['association'] }}</h3><p>Associations</p></div><div class="icon"><i class="fas fa-hands-helping"></i></div></div></div>
+<div class="col-md-3 col-6"><div class="small-box bg-primary"><div class="inner"><h3>{{ $demandes }}</h3><p>Demandes</p></div><div class="icon"><i class="fas fa-cut"></i></div></div></div>
+<div class="col-md-3 col-6"><div class="small-box bg-teal"><div class="inner"><h3>{{ $demandesEnCours }}</h3><p>En cours</p></div><div class="icon"><i class="fas fa-spinner"></i></div></div></div>
 </div>
 <div class="card">
     <div class="card-header"><h3 class="card-title">Dernières inscriptions</h3></div>

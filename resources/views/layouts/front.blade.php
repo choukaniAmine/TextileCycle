@@ -9,6 +9,8 @@
     {{-- Template front office : Start Bootstrap "Landing Page" (inclut Bootstrap 5) --}}
     <link href="{{ asset('templates/frontoffice/css/styles.css') }}" rel="stylesheet">
     @stack('styles')
+    <link href="{{ asset('css/demandes.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/atelier.css') }}" rel="stylesheet">
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light static-top">
@@ -22,6 +24,15 @@
                     <a class="btn btn-outline-dark btn-sm" href="{{ route('admin.dashboard') }}">Back office</a>
                 @endif
                 <a class="btn btn-outline-primary btn-sm" href="{{ route('profile.edit') }}">Mon profil</a>
+                @if (in_array(auth()->user()->role->value, ['particulier', 'association']))
+    <a class="btn btn-success btn-sm" href="{{ route('demandes.index') }}">🧵 Mes demandes</a>
+@endif
+@if (auth()->user()->role->value === 'atelier')
+    <a class="btn btn-success btn-sm" href="{{ route('atelier.demandes.disponibles') }}">📥 Demandes</a>
+    <a class="btn btn-outline-success btn-sm" href="{{ route('atelier.travaux.index') }}">🧵 Mes travaux</a>
+@endif
+@php($nbNotifs = auth()->user()->unreadNotifications()->count())
+<a class="btn btn-light btn-sm" href="{{ route('notifications.index') }}">🔔 @if ($nbNotifs)<span class="badge bg-danger rounded-pill">{{ $nbNotifs }}</span>@endif</a>
                 <form method="POST" action="{{ route('logout') }}" class="m-0">@csrf
                     <button class="btn btn-primary btn-sm">Déconnexion</button>
                 </form>
