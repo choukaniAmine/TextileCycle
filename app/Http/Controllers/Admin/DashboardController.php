@@ -21,6 +21,8 @@ class DashboardController extends Controller
             'totalServices' => \App\Models\Service::count(),
             'parRole' => $parRole,
             'derniers' => User::latest()->take(6)->get(),
+            'demandes' => \App\Models\Demande::count(),
+'demandesEnCours' => \App\Models\Demande::where('statut', 'en_cours')->count(),
         ]);
     }
 }

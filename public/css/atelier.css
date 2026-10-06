@@ -1,0 +1,12 @@
+/* ===== Espace atelier + notifications ===== */
+.kpi{background:#fff;border-radius:1rem;padding:1.1rem;text-align:center;box-shadow:0 4px 14px rgba(60,40,10,.08);border-bottom:4px solid var(--sage)}
+.kpi .n{font-size:2.1rem;font-weight:700;color:var(--sage-d);line-height:1.1}
+.kpi small{color:#7b705e}
+.kpi.clay{border-bottom-color:var(--clay)} .kpi.clay .n{color:var(--clay)}
+.badge-late{background:#b3261e;color:#fff;border-radius:50rem;padding:.2rem .6rem;font-size:.75rem}
+.client-chip{background:var(--sand);border-radius:.8rem;padding:.6rem .9rem;font-size:.9rem}
+.thumb{height:130px;width:100%;object-fit:cover;border-radius:.7rem;margin-bottom:.8rem}
+.notif-item{display:block;background:#fff;border-radius:.9rem;padding:.9rem 1.1rem;margin-bottom:.7rem;text-decoration:none;color:var(--ink);box-shadow:0 2px 8px rgba(60,40,10,.07);transition:.2s}
+.notif-item:hover{transform:translateX(4px);color:var(--ink)}
+.notif-item.unread{border-left:5px solid var(--clay);background:#fff7ef;font-weight:600}
+.notif-item .ico{font-size:1.5rem;margin-right:.8rem}

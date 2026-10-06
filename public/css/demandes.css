@@ -1,0 +1,79 @@
+/* ===== Module Demandes – thème "atelier de couture" ===== */
+:root{--sage:#2f7d5b;--sage-d:#1f5a40;--clay:#c8643b;--cream:#fbf6ee;--sand:#ede3d0;--ink:#2b2a28}
+.demande-hero{background:linear-gradient(120deg,var(--sage-d),var(--sage) 55%,#6fae8a);color:#fff;padding:3rem 0;position:relative;overflow:hidden}
+.demande-hero::after{content:"🧵 ✂️ 🪡 🧥 👗";position:absolute;right:-10px;bottom:-14px;font-size:3.2rem;opacity:.18;letter-spacing:.6rem;transform:rotate(-6deg)}
+.demande-hero h1{font-weight:700}
+.demande-page{background:var(--cream);min-height:60vh;padding:2rem 0 3rem}
+
+/* pastilles de filtre */
+.filter-pill{border-radius:50rem;padding:.35rem .9rem;border:1px dashed var(--sage);color:var(--sage-d);text-decoration:none;font-size:.9rem;background:#fff;display:inline-block;margin:0 .3rem .5rem 0}
+.filter-pill.active,.filter-pill:hover{background:var(--sage);color:#fff;border-style:solid}
+
+/* cartes */
+.demande-card{border:0;border-radius:1rem;background:#fff;box-shadow:0 4px 14px rgba(60,40,10,.08);transition:.25s;position:relative;overflow:hidden;height:100%}
+.demande-card:hover{transform:translateY(-6px) rotate(-.4deg);box-shadow:0 12px 26px rgba(60,40,10,.15)}
+.demande-card::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;background:repeating-linear-gradient(90deg,var(--sage) 0 12px,transparent 12px 18px)}
+.demande-card.transformation::before{background:repeating-linear-gradient(90deg,var(--clay) 0 12px,transparent 12px 18px)}
+.type-emoji{font-size:2rem;width:3.2rem;height:3.2rem;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--sand)}
+.badge-urgent{background:var(--clay);color:#fff;border-radius:50rem;padding:.2rem .6rem;font-size:.75rem}
+.progress.stitch{height:.55rem;border-radius:50rem;background:var(--sand)}
+.progress.stitch .progress-bar{background:repeating-linear-gradient(45deg,var(--sage),var(--sage) 8px,#4c9b78 8px,#4c9b78 16px)}
+
+/* ===== Formulaire de demande ===== */
+.form-intro{color:#7b705e;margin-bottom:1.5rem}
+.form-section-title{display:flex;align-items:center;gap:.6rem;font-weight:700;font-size:1.05rem;color:var(--sage-d);margin:0 0 1rem}
+.form-section-title .num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--sage);color:#fff;font-size:.85rem}
+.form-divider{border:0;border-top:2px dashed var(--sand);margin:1.8rem 0}
+.demande-form .form-label{font-weight:600;color:var(--ink);margin-bottom:.35rem}
+.demande-form .form-control,.demande-form .form-select{border-radius:.7rem;border:1.5px solid #e2d8c5;padding:.65rem .9rem;background:#fff}
+.demande-form .form-control:focus{border-color:var(--sage);box-shadow:0 0 0 .2rem rgba(47,125,91,.15)}
+.demande-form textarea.form-control{min-height:120px}
+.urgent-box{display:flex;align-items:center;gap:.8rem;background:#fff7ef;border:1.5px dashed var(--clay);border-radius:.9rem;padding:.9rem 1.1rem}
+.urgent-box .form-check-input{width:2.6em;height:1.3em;margin:0;cursor:pointer}
+.urgent-box .form-check-input:checked{background-color:var(--clay);border-color:var(--clay)}
+.urgent-box label{cursor:pointer;margin:0;font-weight:600}
+.urgent-box small{display:block;font-weight:400;color:#7b705e}
+.btn-send{background:var(--sage);border:0;color:#fff;border-radius:50rem;padding:.8rem 2rem;font-weight:700;transition:.2s}
+.btn-send:hover{background:var(--sage-d);color:#fff;transform:translateY(-2px);box-shadow:0 8px 18px rgba(47,125,91,.3)}
+
+/* choix du type de demande (cartes) */
+.type-card{display:block;height:100%;margin:0;cursor:pointer;position:relative}
+.type-card input{position:absolute;opacity:0;pointer-events:none}
+.type-card .box{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4rem;height:100%;padding:1.5rem 1rem;background:#fff;border:2px dashed #d9cdb8;border-radius:1.1rem;transition:.2s;position:relative}
+.type-card .emoji{display:flex;align-items:center;justify-content:center;width:68px;height:68px;border-radius:50%;background:var(--sand);font-size:2rem;transition:.2s}
+.type-card .titre{display:block;font-weight:700;font-size:1.1rem;color:var(--ink)}
+.type-card .desc{display:block;font-size:.85rem;color:#7b705e;line-height:1.35}
+.type-card .check{position:absolute;top:.7rem;right:.8rem;width:26px;height:26px;border-radius:50%;background:var(--sage);color:#fff;font-weight:700;font-size:.85rem;display:none;align-items:center;justify-content:center}
+.type-card:hover .box{border-color:var(--sage);transform:translateY(-3px)}
+.type-card input:checked + .box{border:2px solid var(--sage);background:#eef7f2;box-shadow:0 8px 20px rgba(47,125,91,.18)}
+.type-card input:checked + .box .emoji{background:var(--sage);transform:scale(1.08)}
+.type-card input:checked + .box .check{display:flex}
+.type-card input:focus-visible + .box{outline:3px solid rgba(47,125,91,.4)}
+.type-card.transformation:hover .box{border-color:var(--clay)}
+.type-card.transformation input:checked + .box{border-color:var(--clay);background:#fdf1ea;box-shadow:0 8px 20px rgba(200,100,59,.18)}
+.type-card.transformation input:checked + .box .emoji{background:var(--clay)}
+.type-card.transformation .check{background:var(--clay)}
+
+/* stepper "couture" */
+.stitch-stepper{list-style:none;display:flex;padding:0;margin:1rem 0 1.5rem}
+.stitch-stepper li{flex:1;text-align:center;position:relative;color:#9a8f7c}
+.stitch-stepper li+li::before{content:"";position:absolute;top:18px;left:-50%;width:100%;border-top:3px dashed #d9cdb8;z-index:0}
+.stitch-stepper li.done::before,.stitch-stepper li.current::before{border-top:3px solid var(--sage)}
+.stitch-stepper .dot{position:relative;z-index:1;width:38px;height:38px;border-radius:50%;background:var(--sand);display:inline-flex;align-items:center;justify-content:center;font-weight:700}
+.stitch-stepper li.done .dot{background:var(--sage);color:#fff}
+.stitch-stepper li.current .dot{background:var(--clay);color:#fff;animation:pulse 1.8s infinite}
+.stitch-stepper li.done,.stitch-stepper li.current{color:var(--ink)}
+.stitch-stepper .lbl{display:block;font-size:.85rem;margin-top:.3rem;font-weight:600}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(200,100,59,.5)}70%{box-shadow:0 0 0 12px rgba(200,100,59,0)}100%{box-shadow:0 0 0 0 rgba(200,100,59,0)}}
+
+/* anneau de progression */
+.ring{--p:0;width:96px;height:96px;border-radius:50%;background:conic-gradient(var(--sage) calc(var(--p)*1%),var(--sand) 0);display:flex;align-items:center;justify-content:center;margin:auto}
+.ring span{background:#fff;width:74px;height:74px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--sage-d)}
+
+/* frise des interventions */
+.timeline{border-left:3px dashed var(--sand);margin-left:.6rem;padding-left:1.4rem}
+.timeline .item{position:relative;background:#fff;border-radius:.8rem;padding:.9rem 1rem;margin-bottom:1rem;box-shadow:0 2px 8px rgba(60,40,10,.07)}
+.timeline .item::before{content:"🪡";position:absolute;left:-2.35rem;top:.7rem;background:var(--cream);font-size:1.1rem}
+.panel-soft{background:#fff;border-radius:1rem;box-shadow:0 4px 14px rgba(60,40,10,.08);padding:1.4rem}
+.empty-state{text-align:center;padding:3rem 1rem;background:#fff;border-radius:1rem;border:2px dashed var(--sand)}
+.empty-state .big{font-size:3.5rem}
