@@ -1,8 +1,10 @@
 @extends('layouts.front')
 
 @section('content')
-<header class="masthead" style="background-image: url('{{ asset('templates/frontoffice/assets/img/bg-masthead.jpg') }}'); background-size: cover; background-position: center;">
-    <div class="container position-relative">
+<!--<header class="masthead" style="background-image: url('{{ asset('templates/frontoffice/assets/img/bg-masthead.jpg') }}'); background-size: cover; background-position: center;">
+-->
+<header class="masthead">    
+<div class="container position-relative">
         <div class="row justify-content-center">
             <div class="col-xl-7 text-center text-white">
                 <h1 class="mb-4">Donnez une seconde vie à vos vêtements</h1>

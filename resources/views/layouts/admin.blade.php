@@ -49,6 +49,16 @@
         <i class="nav-icon fas fa-cut"></i><p>Demandes</p></a>
 </li>
                
+                    {{-- Module 3 : Associations et dons --}}
+                    <li class="nav-item">
+                        <a href="{{ route('admin.associations.index') }}" class="nav-link {{ request()->routeIs('admin.associations.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-hands-helping"></i><p>Associations</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.dons.index') }}" class="nav-link {{ request()->routeIs('admin.dons.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-gift"></i><p>Dons</p></a>
+                    </li>
+                    {{-- Prochains modules : Vêtements, Réparations… --}}
                 </ul>
             </nav>
         </div>

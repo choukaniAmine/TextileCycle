@@ -8,31 +8,48 @@
     <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,300italic,400italic,700italic" rel="stylesheet">
     {{-- Template front office : Start Bootstrap "Landing Page" (inclut Bootstrap 5) --}}
     <link href="{{ asset('templates/frontoffice/css/styles.css') }}" rel="stylesheet">
-    @stack('styles')
     <link href="{{ asset('css/demandes.css') }}" rel="stylesheet">
     <link href="{{ asset('css/atelier.css') }}" rel="stylesheet">
+    @stack('styles')
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-light bg-light static-top">
     <div class="container">
         <a class="navbar-brand" href="{{ route('home') }}"><i class="bi bi-recycle text-success"></i> {{ config('app.name') }}</a>
-        <div class="d-flex align-items-center gap-2">
+
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+            <a class="btn btn-link btn-sm text-decoration-none" href="{{ route('associations.index') }}">Associations</a>
+
             @auth
-                <span class="me-2 d-none d-md-inline text-muted">{{ auth()->user()->name }}
-                    <span class="badge bg-{{ auth()->user()->role->badge() }}">{{ auth()->user()->role->label() }}</span></span>
-                @if (auth()->user()->isAdmin())
+                @php($me = auth()->user())
+                @php($nbNotifs = $me->unreadNotifications()->count())
+
+                <span class="me-2 d-none d-md-inline text-muted">{{ $me->name }}
+                    <span class="badge bg-{{ $me->role->badge() }}">{{ $me->role->label() }}</span></span>
+
+                @if ($me->isAdmin())
                     <a class="btn btn-outline-dark btn-sm" href="{{ route('admin.dashboard') }}">Back office</a>
                 @endif
+
+                {{-- Module 4 : demandes --}}
+                @if (in_array($me->role->value, ['particulier', 'association']))
+                    <a class="btn btn-success btn-sm" href="{{ route('demandes.index') }}">🧵 Mes demandes</a>
+                @endif
+                @if ($me->role->value === 'atelier')
+                    <a class="btn btn-success btn-sm" href="{{ route('atelier.demandes.disponibles') }}">📥 Demandes</a>
+                    <a class="btn btn-outline-success btn-sm" href="{{ route('atelier.travaux.index') }}">🧵 Mes travaux</a>
+                @endif
+
+                {{-- Module 3 : dons --}}
+                @if ($me->role === \App\Enums\UserRole::Association)
+                    <a class="btn btn-link btn-sm text-decoration-none" href="{{ route('espace.dons.index') }}">Dons reçus</a>
+                @else
+                    <a class="btn btn-link btn-sm text-decoration-none" href="{{ route('dons.index') }}">Mes dons</a>
+                @endif
+
+                <a class="btn btn-light btn-sm" href="{{ route('notifications.index') }}">🔔 @if ($nbNotifs)<span class="badge bg-danger rounded-pill">{{ $nbNotifs }}</span>@endif</a>
                 <a class="btn btn-outline-primary btn-sm" href="{{ route('profile.edit') }}">Mon profil</a>
-                @if (in_array(auth()->user()->role->value, ['particulier', 'association']))
-    <a class="btn btn-success btn-sm" href="{{ route('demandes.index') }}">🧵 Mes demandes</a>
-@endif
-@if (auth()->user()->role->value === 'atelier')
-    <a class="btn btn-success btn-sm" href="{{ route('atelier.demandes.disponibles') }}">📥 Demandes</a>
-    <a class="btn btn-outline-success btn-sm" href="{{ route('atelier.travaux.index') }}">🧵 Mes travaux</a>
-@endif
-@php($nbNotifs = auth()->user()->unreadNotifications()->count())
-<a class="btn btn-light btn-sm" href="{{ route('notifications.index') }}">🔔 @if ($nbNotifs)<span class="badge bg-danger rounded-pill">{{ $nbNotifs }}</span>@endif</a>
+
                 <form method="POST" action="{{ route('logout') }}" class="m-0">@csrf
                     <button class="btn btn-primary btn-sm">Déconnexion</button>
                 </form>

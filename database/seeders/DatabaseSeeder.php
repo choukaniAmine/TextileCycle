@@ -10,6 +10,7 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Module 1 : utilisateurs
         User::factory()->role(UserRole::Admin)->create([
             'name' => 'Administrateur', 'email' => 'admin@refashion.test', 'city' => 'Tunis',
         ]);
@@ -26,6 +27,11 @@ class DatabaseSeeder extends Seeder
         User::factory(8)->create();
         User::factory(3)->role(UserRole::Atelier)->create();
         User::factory(3)->role(UserRole::Association)->create();
+
+        // Module 4 : demandes de réparation / transformation et interventions
         $this->call(DemandeSeeder::class);
+
+        // Module 3 : associations et dons
+        $this->call(AssociationSeeder::class);
     }
 }

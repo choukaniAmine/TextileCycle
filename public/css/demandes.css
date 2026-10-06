@@ -19,11 +19,40 @@
 .progress.stitch{height:.55rem;border-radius:50rem;background:var(--sand)}
 .progress.stitch .progress-bar{background:repeating-linear-gradient(45deg,var(--sage),var(--sage) 8px,#4c9b78 8px,#4c9b78 16px)}
 
-/* choix du type (cartes radio) */
-.type-card input{display:none}
-.type-card .box{border:2px dashed var(--sand);border-radius:1rem;padding:1.1rem;text-align:center;cursor:pointer;transition:.2s;background:#fff;height:100%}
-.type-card .box .big{font-size:2.4rem;display:block}
-.type-card input:checked + .box{border:2px solid var(--sage);background:#eef7f2;transform:scale(1.03);box-shadow:0 6px 16px rgba(47,125,91,.2)}
+/* ===== Formulaire de demande ===== */
+.form-intro{color:#7b705e;margin-bottom:1.5rem}
+.form-section-title{display:flex;align-items:center;gap:.6rem;font-weight:700;font-size:1.05rem;color:var(--sage-d);margin:0 0 1rem}
+.form-section-title .num{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:var(--sage);color:#fff;font-size:.85rem}
+.form-divider{border:0;border-top:2px dashed var(--sand);margin:1.8rem 0}
+.demande-form .form-label{font-weight:600;color:var(--ink);margin-bottom:.35rem}
+.demande-form .form-control,.demande-form .form-select{border-radius:.7rem;border:1.5px solid #e2d8c5;padding:.65rem .9rem;background:#fff}
+.demande-form .form-control:focus{border-color:var(--sage);box-shadow:0 0 0 .2rem rgba(47,125,91,.15)}
+.demande-form textarea.form-control{min-height:120px}
+.urgent-box{display:flex;align-items:center;gap:.8rem;background:#fff7ef;border:1.5px dashed var(--clay);border-radius:.9rem;padding:.9rem 1.1rem}
+.urgent-box .form-check-input{width:2.6em;height:1.3em;margin:0;cursor:pointer}
+.urgent-box .form-check-input:checked{background-color:var(--clay);border-color:var(--clay)}
+.urgent-box label{cursor:pointer;margin:0;font-weight:600}
+.urgent-box small{display:block;font-weight:400;color:#7b705e}
+.btn-send{background:var(--sage);border:0;color:#fff;border-radius:50rem;padding:.8rem 2rem;font-weight:700;transition:.2s}
+.btn-send:hover{background:var(--sage-d);color:#fff;transform:translateY(-2px);box-shadow:0 8px 18px rgba(47,125,91,.3)}
+
+/* choix du type de demande (cartes) */
+.type-card{display:block;height:100%;margin:0;cursor:pointer;position:relative}
+.type-card input{position:absolute;opacity:0;pointer-events:none}
+.type-card .box{display:flex;flex-direction:column;align-items:center;text-align:center;gap:.4rem;height:100%;padding:1.5rem 1rem;background:#fff;border:2px dashed #d9cdb8;border-radius:1.1rem;transition:.2s;position:relative}
+.type-card .emoji{display:flex;align-items:center;justify-content:center;width:68px;height:68px;border-radius:50%;background:var(--sand);font-size:2rem;transition:.2s}
+.type-card .titre{display:block;font-weight:700;font-size:1.1rem;color:var(--ink)}
+.type-card .desc{display:block;font-size:.85rem;color:#7b705e;line-height:1.35}
+.type-card .check{position:absolute;top:.7rem;right:.8rem;width:26px;height:26px;border-radius:50%;background:var(--sage);color:#fff;font-weight:700;font-size:.85rem;display:none;align-items:center;justify-content:center}
+.type-card:hover .box{border-color:var(--sage);transform:translateY(-3px)}
+.type-card input:checked + .box{border:2px solid var(--sage);background:#eef7f2;box-shadow:0 8px 20px rgba(47,125,91,.18)}
+.type-card input:checked + .box .emoji{background:var(--sage);transform:scale(1.08)}
+.type-card input:checked + .box .check{display:flex}
+.type-card input:focus-visible + .box{outline:3px solid rgba(47,125,91,.4)}
+.type-card.transformation:hover .box{border-color:var(--clay)}
+.type-card.transformation input:checked + .box{border-color:var(--clay);background:#fdf1ea;box-shadow:0 8px 20px rgba(200,100,59,.18)}
+.type-card.transformation input:checked + .box .emoji{background:var(--clay)}
+.type-card.transformation .check{background:var(--clay)}
 
 /* stepper "couture" */
 .stitch-stepper{list-style:none;display:flex;padding:0;margin:1rem 0 1.5rem}
