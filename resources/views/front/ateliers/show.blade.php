@@ -320,16 +320,21 @@
                                         <i class="bi bi-send me-2"></i>{{ $monAvis ? 'Mettre à jour mon avis' : 'Publier mon avis' }}
                                     </button>
                                     @if($monAvis)
-                                        <form action="{{ route('avis.destroy', $monAvis) }}" method="POST" class="d-inline m-0">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="btn btn-outline-danger rounded-pill px-3"
-                                                    onclick="return confirm('Supprimer votre avis ?')">
-                                                <i class="bi bi-trash"></i>
-                                            </button>
-                                        </form>
+                                        <button type="button" class="btn btn-outline-danger rounded-pill px-3"
+                                                onclick="if(confirm('Supprimer votre avis ?')) document.getElementById('delete-avis-form').submit();"
+                                                title="Supprimer mon avis">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
                                     @endif
                                 </div>
                             </form>
+
+                            @if($monAvis)
+                                <form id="delete-avis-form" action="{{ route('ateliers.avis.destroy', $atelier) }}" method="POST" class="d-none">
+                                    @csrf
+                                    @method('DELETE')
+                                </form>
+                            @endif
                         </div>
                     @else
                         <div class="alert border-0 mb-4 rounded-3 small"

@@ -173,6 +173,21 @@ class AtelierServiceTest extends TestCase
         $this->assertDatabaseMissing('avis', ['id' => $avis->id]);
     }
 
+    public function test_user_can_delete_review_via_atelier_route(): void
+    {
+        $user = User::factory()->create();
+        $atelier = Atelier::factory()->create(['est_actif' => true]);
+
+        $this->actingAs($user)->post(route('ateliers.avis.store', $atelier), [
+            'note' => 4,
+            'commentaire' => 'Bien',
+        ]);
+
+        $response = $this->actingAs($user)->delete(route('ateliers.avis.destroy', $atelier));
+        $response->assertRedirect(route('ateliers.show', $atelier));
+        $this->assertDatabaseMissing('avis', ['atelier_id' => $atelier->id, 'user_id' => $user->id]);
+    }
+
     public function test_ajax_filter_returns_json_response(): void
     {
         Atelier::factory()->create(['nom' => 'Atelier Unique Eco', 'est_actif' => true, 'ville' => 'Tunis']);

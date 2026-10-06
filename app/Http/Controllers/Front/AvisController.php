@@ -50,7 +50,22 @@ class AvisController extends Controller
     }
 
     /**
-     * Supprimer son propre avis.
+     * Supprimer son propre avis sur un atelier donné.
+     */
+    public function destroyForAtelier(Atelier $atelier)
+    {
+        $avis = Avis::where('atelier_id', $atelier->id)
+                    ->where('user_id', auth()->id())
+                    ->firstOrFail();
+
+        $avis->delete();
+
+        return redirect()->route('ateliers.show', $atelier)
+                         ->with('success', 'Votre avis a été supprimé.');
+    }
+
+    /**
+     * Supprimer son propre avis par ID.
      */
     public function destroy(Avis $avis)
     {

@@ -26,6 +26,7 @@ Route::middleware('auth')->group(function () {
 
     // Module 2 — Avis sur les ateliers (utilisateur connecté)
     Route::post('/ateliers/{atelier}/avis', [Front\AvisController::class, 'store'])->name('ateliers.avis.store');
+    Route::delete('/ateliers/{atelier}/avis', [Front\AvisController::class, 'destroyForAtelier'])->name('ateliers.avis.destroy');
     Route::delete('/avis/{avis}', [Front\AvisController::class, 'destroy'])->name('avis.destroy');
 });
 
