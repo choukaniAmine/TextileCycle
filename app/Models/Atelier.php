@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\DB;
 
 class Atelier extends Model
 {
@@ -41,5 +42,29 @@ class Atelier extends Model
     public function scopeActif($query)
     {
         return $query->where('est_actif', true);
+    }
+
+    /**
+     * Un atelier peut recevoir plusieurs avis.
+     */
+    public function avis(): HasMany
+    {
+        return $this->hasMany(Avis::class)->where('is_visible', true)->latest();
+    }
+
+    /**
+     * Moyenne des notes (float, 1 décimale).
+     */
+    public function moyenneNote(): float
+    {
+        return round($this->avis()->avg('note') ?? 0, 1);
+    }
+
+    /**
+     * Nombre d'avis visibles.
+     */
+    public function nombreAvis(): int
+    {
+        return $this->avis()->count();
     }
 }

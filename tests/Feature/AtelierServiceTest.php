@@ -109,4 +109,78 @@ class AtelierServiceTest extends TestCase
         $this->assertDatabaseMissing('ateliers', ['id' => $atelier->id]);
         $this->assertDatabaseMissing('services', ['id' => $service->id]);
     }
+
+    public function test_authenticated_user_can_leave_review_on_atelier(): void
+    {
+        $user = User::factory()->create();
+        $atelier = Atelier::factory()->create(['est_actif' => true]);
+
+        $response = $this->actingAs($user)->post(route('ateliers.avis.store', $atelier), [
+            'note' => 5,
+            'commentaire' => 'Atelier exceptionnel et travail soigné !',
+        ]);
+
+        $response->assertSessionHas('success');
+        $this->assertDatabaseHas('avis', [
+            'atelier_id' => $atelier->id,
+            'user_id' => $user->id,
+            'note' => 5,
+            'commentaire' => 'Atelier exceptionnel et travail soigné !',
+        ]);
+        $this->assertEquals(5.0, $atelier->moyenneNote());
+        $this->assertEquals(1, $atelier->nombreAvis());
+    }
+
+    public function test_user_can_update_existing_review(): void
+    {
+        $user = User::factory()->create();
+        $atelier = Atelier::factory()->create(['est_actif' => true]);
+
+        $this->actingAs($user)->post(route('ateliers.avis.store', $atelier), [
+            'note' => 3,
+            'commentaire' => 'Moyen',
+        ]);
+
+        // Mise à jour de l'avis
+        $this->actingAs($user)->post(route('ateliers.avis.store', $atelier), [
+            'note' => 5,
+            'commentaire' => 'Finalement parfait !',
+        ]);
+
+        $this->assertDatabaseCount('avis', 1);
+        $this->assertDatabaseHas('avis', [
+            'atelier_id' => $atelier->id,
+            'user_id' => $user->id,
+            'note' => 5,
+            'commentaire' => 'Finalement parfait !',
+        ]);
+    }
+
+    public function test_user_can_delete_their_own_review(): void
+    {
+        $user = User::factory()->create();
+        $atelier = Atelier::factory()->create(['est_actif' => true]);
+
+        $this->actingAs($user)->post(route('ateliers.avis.store', $atelier), [
+            'note' => 4,
+            'commentaire' => 'Bien',
+        ]);
+
+        $avis = \App\Models\Avis::where('atelier_id', $atelier->id)->first();
+
+        $response = $this->actingAs($user)->delete(route('avis.destroy', $avis));
+        $response->assertRedirect(route('ateliers.show', $atelier));
+        $this->assertDatabaseMissing('avis', ['id' => $avis->id]);
+    }
+
+    public function test_ajax_filter_returns_json_response(): void
+    {
+        Atelier::factory()->create(['nom' => 'Atelier Unique Eco', 'est_actif' => true, 'ville' => 'Tunis']);
+
+        $response = $this->getJson(route('ateliers.index', ['search' => 'Unique']));
+        $response->assertStatus(200);
+        $response->assertJsonStructure(['html', 'total', 'pagination']);
+        $this->assertEquals(1, $response->json('total'));
+    }
 }
+

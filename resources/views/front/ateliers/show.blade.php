@@ -100,9 +100,24 @@
         color:inherit;
     }
 
-    /* ── Stars ── */
     .stars { color:#f5a623; }
     .stars .empty { color:#dee2e6; }
+
+    /* ── Avis ── */
+    .avis-card {
+        border:1.5px solid #f1f5f9;
+        border-radius:14px; padding:20px;
+        background:#fff; transition:box-shadow .2s;
+    }
+    .avis-card:hover { box-shadow:0 4px 16px rgba(0,0,0,.07); }
+    .note-bar-wrap { height:8px; background:#e9ecef; border-radius:50px; overflow:hidden; }
+    .note-bar { height:100%; background:linear-gradient(90deg,#f5a623,#f7c948); border-radius:50px; }
+    .star-select label { cursor:pointer; font-size:1.8rem; color:#dee2e6; transition:color .15s; }
+    .star-select input[type="radio"] { display:none; }
+    .star-select input[type="radio"]:checked ~ label,
+    .star-select label:hover,
+    .star-select label:hover ~ label { color:#f5a623; }
+    .star-select { display:flex; flex-direction:row-reverse; justify-content:flex-end; gap:4px; }
 
     /* ── CTA Banner ── */
     .cta-banner {
@@ -140,13 +155,20 @@
         </div>
         <h1 class="fw-bold mt-3 mb-0" style="font-size:2rem;">{{ $atelier->nom }}</h1>
 
-        {{-- Étoiles ── --}}
-        @php $stars = (($atelier->id * 7) % 2) + 4; @endphp
-        <div class="stars mt-2">
+        {{-- Étoiles réelles depuis la BDD ── --}}
+        @php
+            $moyenne = $atelier->moyenneNote();
+            $nbAvis  = $atelier->nombreAvis();
+            $etoiles = (int) round($moyenne);
+        @endphp
+        <div class="stars mt-2 d-flex align-items-center gap-2">
             @for ($i = 1; $i <= 5; $i++)
-                <i class="bi bi-star{{ $i <= $stars ? '-fill' : ' empty' }}"></i>
+                <i class="bi bi-star{{ $i <= $etoiles ? '-fill' : ' empty' }}"></i>
             @endfor
-            <span style="opacity:.8; font-size:.85rem; margin-left:6px;">{{ $stars }}.0 / 5</span>
+            <span style="opacity:.85; font-size:.9rem;">
+                <strong>{{ $moyenne > 0 ? $moyenne : 'Nouveau' }}</strong>
+                @if($nbAvis > 0) / 5 &nbsp;·&nbsp; {{ $nbAvis }} avis @endif
+            </span>
         </div>
     </div>
 </div>
@@ -216,6 +238,138 @@
                         <div class="text-center py-4 text-muted small">
                             <i class="bi bi-exclamation-circle fs-3 d-block mb-2"></i>
                             Aucun service disponible pour le moment.
+                        </div>
+                    @endforelse
+                </div>
+
+                {{-- ⭐ SECTION AVIS CLIENTS (VALEUR AJOUTÉE) ── --}}
+                <div class="content-card p-4 p-md-5 mb-4" style="margin-top:0;">
+                    <h5 class="fw-bold mb-4">
+                        <i class="bi bi-chat-square-text text-warning me-2"></i>
+                        Avis clients
+                        @if($nbAvis > 0)
+                            <span class="badge rounded-pill ms-2 px-3"
+                                  style="background:#fff3e0; color:#e65100; font-size:.75rem; border:1px solid #ffe0b2;">
+                                {{ $nbAvis }} avis · {{ $moyenne }}/5
+                            </span>
+                        @endif
+                    </h5>
+
+                    {{-- Résumé notation + barres --}}
+                    @if($nbAvis > 0)
+                    <div class="row g-4 align-items-center mb-4 pb-4 border-bottom">
+                        <div class="col-auto text-center">
+                            <div style="font-size:3.5rem; font-weight:900; line-height:1; color:#f5a623;">{{ $moyenne }}</div>
+                            <div class="stars my-1">
+                                @for($i=1;$i<=5;$i++)
+                                    <i class="bi bi-star{{ $i<=$etoiles?'-fill':' empty' }}" style="font-size:.85rem;"></i>
+                                @endfor
+                            </div>
+                            <div class="text-muted small">{{ $nbAvis }} avis</div>
+                        </div>
+                        <div class="col">
+                            @foreach($repartition as $note => $count)
+                                @php $pct = $nbAvis > 0 ? round($count/$nbAvis*100) : 0; @endphp
+                                <div class="d-flex align-items-center gap-2 mb-1">
+                                    <span class="small text-muted" style="width:10px;">{{ $note }}</span>
+                                    <i class="bi bi-star-fill text-warning" style="font-size:.7rem;"></i>
+                                    <div class="note-bar-wrap flex-grow-1">
+                                        <div class="note-bar" style="width:{{ $pct }}%;"></div>
+                                    </div>
+                                    <span class="small text-muted" style="width:28px;">{{ $count }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                    @endif
+
+                    {{-- Formulaire laisser un avis ── --}}
+                    @auth
+                        <div class="mb-4 pb-4 border-bottom">
+                            <h6 class="fw-bold mb-3">
+                                {{ $monAvis ? '✏️ Modifier votre avis' : '⭐ Laisser un avis' }}
+                            </h6>
+                            <form action="{{ route('ateliers.avis.store', $atelier) }}" method="POST">
+                                @csrf
+                                {{-- Sélecteur d'étoiles interactif --}}
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-secondary">Votre note</label>
+                                    <div class="star-select">
+                                        @for($i=5;$i>=1;$i--)
+                                            <input type="radio" name="note" id="star{{ $i }}" value="{{ $i }}"
+                                                   {{ ($monAvis && $monAvis->note == $i) ? 'checked' : '' }}>
+                                            <label for="star{{ $i }}" title="{{ $i }} étoile(s)">
+                                                <i class="bi bi-star-fill"></i>
+                                            </label>
+                                        @endfor
+                                    </div>
+                                    @error('note') <div class="text-danger small mt-1">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label small fw-bold text-secondary">Commentaire <span class="text-muted fw-normal">(optionnel)</span></label>
+                                    <textarea name="commentaire" rows="3"
+                                              class="form-control @error('commentaire') is-invalid @enderror"
+                                              placeholder="Partagez votre expérience avec cet atelier…"
+                                              maxlength="500"
+                                              style="border-radius:10px; border:1.5px solid #dee2e6; font-size:.9rem;">{{ old('commentaire', $monAvis?->commentaire) }}</textarea>
+                                    @error('commentaire') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn rounded-pill px-4 fw-semibold"
+                                            style="background:linear-gradient(135deg,#0f7038,#28c76f); color:#fff; border:none;">
+                                        <i class="bi bi-send me-2"></i>{{ $monAvis ? 'Mettre à jour mon avis' : 'Publier mon avis' }}
+                                    </button>
+                                    @if($monAvis)
+                                        <form action="{{ route('avis.destroy', $monAvis) }}" method="POST" class="d-inline m-0">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="btn btn-outline-danger rounded-pill px-3"
+                                                    onclick="return confirm('Supprimer votre avis ?')">
+                                                <i class="bi bi-trash"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
+                            </form>
+                        </div>
+                    @else
+                        <div class="alert border-0 mb-4 rounded-3 small"
+                             style="background:#f0fdf4; color:#0f7038; border:1.5px solid #c8e6c9 !important;">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <a href="{{ route('login') }}" class="fw-bold text-success">Connectez-vous</a>
+                            pour noter et donner votre avis sur cet atelier.
+                        </div>
+                    @endauth
+
+                    {{-- Liste des avis ── --}}
+                    @forelse($atelier->avis as $avis)
+                        <div class="avis-card mb-3">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-white"
+                                         style="width:38px;height:38px;background:linear-gradient(135deg,#0f7038,#28c76f);font-size:.85rem;flex-shrink:0;">
+                                        {{ strtoupper(substr($avis->auteur->name ?? 'A', 0, 1)) }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold small text-dark">{{ $avis->auteur->name ?? 'Utilisateur' }}</div>
+                                        <div class="text-muted" style="font-size:.72rem;">{{ $avis->created_at->diffForHumans() }}</div>
+                                    </div>
+                                </div>
+                                <div class="stars" style="font-size:.8rem;">
+                                    @for($i=1;$i<=5;$i++)
+                                        <i class="bi bi-star{{ $i<=$avis->note?'-fill':' empty' }}"></i>
+                                    @endfor
+                                </div>
+                            </div>
+                            @if($avis->commentaire)
+                                <p class="text-muted small mb-0 ms-1" style="line-height:1.7;">
+                                    "{{ $avis->commentaire }}"
+                                </p>
+                            @endif
+                        </div>
+                    @empty
+                        <div class="text-center py-4 text-muted small">
+                            <i class="bi bi-chat-dots fs-3 d-block mb-2"></i>
+                            Aucun avis pour le moment. Soyez le premier à donner votre avis !
                         </div>
                     @endforelse
                 </div>

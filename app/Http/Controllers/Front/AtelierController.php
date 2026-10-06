@@ -50,8 +50,8 @@ class AtelierController extends Controller
         $totalServices = Service::where('disponible', true)->count();
         $totalVilles   = Atelier::actif()->distinct('ville')->count('ville');
 
-        // Requête AJAX → retourner JSON (HTML partiel + total + pagination)
-        if ($request->ajax()) {
+        // Requête AJAX ou JSON → retourner JSON (HTML partiel + total + pagination)
+        if ($request->ajax() || $request->wantsJson()) {
             $html = '';
             foreach ($ateliers as $atelier) {
                 $html .= view('front.ateliers._card', compact('atelier'))->render();
@@ -79,7 +79,10 @@ class AtelierController extends Controller
      */
     public function show(Atelier $atelier)
     {
-        $atelier->load(['services' => fn($q) => $q->where('disponible', true)->latest()]);
+        $atelier->load([
+            'services' => fn($q) => $q->where('disponible', true)->latest(),
+            'avis.auteur',
+        ]);
 
         // Ateliers similaires (même ville, différent)
         $similaires = Atelier::actif()
@@ -89,6 +92,17 @@ class AtelierController extends Controller
             ->limit(3)
             ->get();
 
-        return view('front.ateliers.show', compact('atelier', 'similaires'));
+        // Avis de l'utilisateur connecté (pour pré-remplir le formulaire)
+        $monAvis = auth()->check()
+            ? $atelier->avis->firstWhere('user_id', auth()->id())
+            : null;
+
+        // Répartition des notes (distribution pour le graphe)
+        $repartition = [];
+        for ($i = 5; $i >= 1; $i--) {
+            $repartition[$i] = $atelier->avis->where('note', $i)->count();
+        }
+
+        return view('front.ateliers.show', compact('atelier', 'similaires', 'monAvis', 'repartition'));
     }
 }

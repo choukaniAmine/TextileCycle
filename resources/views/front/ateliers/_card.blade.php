@@ -22,19 +22,26 @@
 
         {{-- Body --}}
         <div class="card-body d-flex flex-column p-4">
-            {{-- Étoiles fictives basées sur l'id (valeur ajoutée visuelle) --}}
+            {{-- Étoiles réelles depuis la BDD --}}
             @php
-                $stars = (($atelier->id * 7) % 2) + 4; // 4 ou 5 étoiles
+                $moyenne = $atelier->moyenneNote();
+                $nbAvis  = $atelier->nombreAvis();
+                $etoiles = (int) round($moyenne);
             @endphp
-            <div class="stars mb-2">
+            <div class="stars mb-2 d-flex align-items-center">
                 @for ($i = 1; $i <= 5; $i++)
-                    @if ($i <= $stars)
+                    @if ($i <= $etoiles)
                         <i class="bi bi-star-fill"></i>
                     @else
                         <i class="bi bi-star empty"></i>
                     @endif
                 @endfor
-                <span class="text-muted small ms-1">{{ $stars }}.0</span>
+                <span class="text-muted small ms-2">
+                    {{ $moyenne > 0 ? $moyenne : 'Nouveau' }}
+                    @if($nbAvis > 0)
+                        <span class="text-secondary" style="font-size: .75rem;">({{ $nbAvis }})</span>
+                    @endif
+                </span>
             </div>
 
             <h5 class="fw-bold text-dark mb-1">{{ $atelier->nom }}</h5>

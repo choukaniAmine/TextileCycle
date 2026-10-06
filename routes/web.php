@@ -23,6 +23,10 @@ Route::middleware('auth')->group(function () {
     Route::post('/deconnexion', [AuthController::class, 'logout'])->name('logout');
     Route::get('/profil', [Front\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profil', [Front\ProfileController::class, 'update'])->name('profile.update');
+
+    // Module 2 — Avis sur les ateliers (utilisateur connecté)
+    Route::post('/ateliers/{atelier}/avis', [Front\AvisController::class, 'store'])->name('ateliers.avis.store');
+    Route::delete('/avis/{avis}', [Front\AvisController::class, 'destroy'])->name('avis.destroy');
 });
 
 // ---------- Back office (admin uniquement) ----------

@@ -3,13 +3,17 @@
 namespace Database\Seeders;
 
 use App\Models\Atelier;
+use App\Models\Avis;
 use App\Models\Service;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class AtelierSeeder extends Seeder
 {
     public function run(): void
     {
+        $users = User::all();
+
         $ateliersData = [
             [
                 'nom' => 'EcoStyle Atelier & Retouches',
@@ -46,6 +50,11 @@ class AtelierSeeder extends Seeder
                         'duree_estimee' => '3 jours',
                         'disponible' => true,
                     ],
+                ],
+                'avis' => [
+                    ['note' => 5, 'commentaire' => 'Travail exceptionnel ! Ma veste préférée a retrouvé une seconde jeunesse.'],
+                    ['note' => 5, 'commentaire' => 'Rapide, très soigné et accueil très chaleureux. Je recommande à 100%.'],
+                    ['note' => 4, 'commentaire' => 'Bon travail sur mes ourlets de pantalons, fini dans les délais.'],
                 ]
             ],
             [
@@ -75,6 +84,10 @@ class AtelierSeeder extends Seeder
                         'duree_estimee' => '2 jours',
                         'disponible' => true,
                     ],
+                ],
+                'avis' => [
+                    ['note' => 5, 'commentaire' => 'Le sac créé à partir de mon vieux jean est magnifique et très solide !'],
+                    ['note' => 4, 'commentaire' => 'Créativité au top, démarche écologique exemplaire.'],
                 ]
             ],
             [
@@ -104,6 +117,9 @@ class AtelierSeeder extends Seeder
                         'duree_estimee' => '48h',
                         'disponible' => true,
                     ],
+                ],
+                'avis' => [
+                    ['note' => 5, 'commentaire' => 'Un travail de maître pour mon costume, ajustement parfait.'],
                 ]
             ],
             [
@@ -125,13 +141,17 @@ class AtelierSeeder extends Seeder
                         'duree_estimee' => '3 jours',
                         'disponible' => true,
                     ],
+                ],
+                'avis' => [
+                    ['note' => 4, 'commentaire' => 'Très bon rapport qualité-prix et travail propre.'],
                 ]
             ]
         ];
 
         foreach ($ateliersData as $data) {
             $services = $data['services'];
-            unset($data['services']);
+            $avisList = $data['avis'] ?? [];
+            unset($data['services'], $data['avis']);
 
             $atelier = Atelier::create($data);
 
@@ -139,12 +159,40 @@ class AtelierSeeder extends Seeder
                 $serviceData['atelier_id'] = $atelier->id;
                 Service::create($serviceData);
             }
+
+            // Créer les avis pour cet atelier
+            foreach ($avisList as $index => $avisData) {
+                $user = $users->get($index % max($users->count(), 1));
+                if ($user) {
+                    Avis::create([
+                        'atelier_id'  => $atelier->id,
+                        'user_id'     => $user->id,
+                        'note'        => $avisData['note'],
+                        'commentaire' => $avisData['commentaire'],
+                    ]);
+                }
+            }
         }
 
         // 4 ateliers supplémentaires générés avec la factory
-        Atelier::factory()
+        $factoryAteliers = Atelier::factory()
             ->count(4)
             ->has(Service::factory()->count(3))
             ->create();
+
+        // Ajouter des avis aléatoires pour ces ateliers factory
+        foreach ($factoryAteliers as $atelier) {
+            if ($users->isNotEmpty()) {
+                $randomUsers = $users->random(min(2, $users->count()));
+                foreach ($randomUsers as $user) {
+                    Avis::create([
+                        'atelier_id'  => $atelier->id,
+                        'user_id'     => $user->id,
+                        'note'        => rand(4, 5),
+                        'commentaire' => 'Service de retouche très satisfaisant et respectueux des délais.',
+                    ]);
+                }
+            }
+        }
     }
 }
