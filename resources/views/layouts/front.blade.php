@@ -17,23 +17,43 @@
         <div class="d-flex align-items-center gap-2">
             <a class="btn btn-link btn-sm text-decoration-none" href="{{ route('associations.index') }}">Associations</a>
             @auth
-                <a class="btn btn-link btn-sm text-decoration-none" href="{{ route('dons.index') }}">Mes dons</a>
-                @if (auth()->user()->role === \App\Enums\UserRole::Association)
-                    <a class="btn btn-link btn-sm text-decoration-none" href="{{ route('espace.dons.index') }}">Dons reçus</a>
-                @endif
-                <span class="me-2 d-none d-md-inline text-muted">{{ auth()->user()->name }}
-                    <span class="badge bg-{{ auth()->user()->role->badge() }}">{{ auth()->user()->role->label() }}</span></span>
-                @if (auth()->user()->isAdmin())
-                    <a class="btn btn-outline-dark btn-sm" href="{{ route('admin.dashboard') }}">Back office</a>
-                @endif
-                <a class="btn btn-outline-primary btn-sm" href="{{ route('profile.edit') }}">Mon profil</a>
-                <form method="POST" action="{{ route('logout') }}" class="m-0">@csrf
-                    <button class="btn btn-primary btn-sm">Déconnexion</button>
-                </form>
-            @else
-                <a class="btn btn-outline-primary btn-sm" href="{{ route('login') }}">Connexion</a>
-                <a class="btn btn-primary btn-sm" href="{{ route('register') }}">Inscription</a>
-            @endauth
+    @if (auth()->user()->role !== \App\Enums\UserRole::Association)
+        <a class="btn btn-link btn-sm text-decoration-none" href="{{ route('dons.index') }}">
+            Mes dons
+        </a>
+    @endif
+
+    @if (auth()->user()->role === \App\Enums\UserRole::Association)
+        <a class="btn btn-link btn-sm text-decoration-none" href="{{ route('espace.dons.index') }}">
+            Dons reçus
+        </a>
+    @endif
+
+    <span class="me-2 d-none d-md-inline text-muted">
+        {{ auth()->user()->name }}
+        <span class="badge bg-{{ auth()->user()->role->badge() }}">
+            {{ auth()->user()->role->label() }}
+        </span>
+    </span>
+
+    @if (auth()->user()->isAdmin())
+        <a class="btn btn-outline-dark btn-sm" href="{{ route('admin.dashboard') }}">
+            Back office
+        </a>
+    @endif
+
+    <a class="btn btn-outline-primary btn-sm" href="{{ route('profile.edit') }}">
+        Mon profil
+    </a>
+
+    <form method="POST" action="{{ route('logout') }}" class="m-0">
+        @csrf
+        <button class="btn btn-primary btn-sm">Déconnexion</button>
+    </form>
+@else
+    <a class="btn btn-outline-primary btn-sm" href="{{ route('login') }}">Connexion</a>
+    <a class="btn btn-primary btn-sm" href="{{ route('register') }}">Inscription</a>
+@endauth
         </div>
     </div>
 </nav>
