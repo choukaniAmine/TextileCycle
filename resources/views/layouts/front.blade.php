@@ -15,7 +15,12 @@
     <div class="container">
         <a class="navbar-brand" href="{{ route('home') }}"><i class="bi bi-recycle text-success"></i> {{ config('app.name') }}</a>
         <div class="d-flex align-items-center gap-2">
+            <a class="btn btn-link btn-sm text-decoration-none" href="{{ route('associations.index') }}">Associations</a>
             @auth
+                <a class="btn btn-link btn-sm text-decoration-none" href="{{ route('dons.index') }}">Mes dons</a>
+                @if (auth()->user()->role === \App\Enums\UserRole::Association)
+                    <a class="btn btn-link btn-sm text-decoration-none" href="{{ route('espace.dons.index') }}">Dons reçus</a>
+                @endif
                 <span class="me-2 d-none d-md-inline text-muted">{{ auth()->user()->name }}
                     <span class="badge bg-{{ auth()->user()->role->badge() }}">{{ auth()->user()->role->label() }}</span></span>
                 @if (auth()->user()->isAdmin())
