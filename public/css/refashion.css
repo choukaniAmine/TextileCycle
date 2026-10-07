@@ -1,0 +1,154 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&display=swap');
+
+:root {
+    --rf-green: #16B84E;
+    --rf-green-dark: #0F8F3B;
+    --rf-green-deep: #0A3D1F;
+    --rf-green-soft: #E6F8ED;
+    --rf-cream: #F6FBF7;
+    --rf-ink: #14261B;
+    --rf-muted: #6B7C71;
+    --rf-sun: #FFC857;
+    --rf-radius: 1.25rem;
+    --rf-shadow: 0 10px 30px rgba(10, 61, 31, .08);
+    --rf-shadow-lg: 0 18px 40px rgba(10, 61, 31, .16);
+
+    --bs-primary: #16B84E;
+    --bs-primary-rgb: 22, 184, 78;
+    --bs-link-color: #0F8F3B;
+    --bs-link-hover-color: #0A3D1F;
+}
+
+body {
+    background: var(--rf-cream);
+    color: var(--rf-ink);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+h1, h2, h3, h4, h5, .rf-brand { font-family: 'Poppins', 'Lato', sans-serif; color: var(--rf-green-deep); }
+a { color: var(--rf-green-dark); }
+
+/* ---------- Boutons ---------- */
+.btn { border-radius: 50rem; font-weight: 600; padding-inline: 1.25rem; transition: all .2s ease; }
+.btn-sm { padding-inline: 1rem; }
+.btn-primary, .btn-success {
+    background: var(--rf-green); border-color: var(--rf-green); color: #fff;
+    box-shadow: 0 6px 16px rgba(22, 184, 78, .3);
+}
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active,
+.btn-success:hover, .btn-success:focus, .btn-success:active {
+    background: var(--rf-green-dark) !important; border-color: var(--rf-green-dark) !important; color: #fff;
+    transform: translateY(-2px);
+}
+.btn-outline-primary { color: var(--rf-green-dark); border-color: var(--rf-green); }
+.btn-outline-primary:hover { background: var(--rf-green); border-color: var(--rf-green); color: #fff; }
+.btn-outline-secondary { color: var(--rf-green-deep); border-color: #cfe3d6; background: #fff; }
+.btn-outline-secondary:hover { background: var(--rf-green-soft); border-color: var(--rf-green); color: var(--rf-green-deep); }
+.btn-warning { background: var(--rf-sun); border-color: var(--rf-sun); color: var(--rf-green-deep); }
+.btn-warning:hover { background: #ffb92e; border-color: #ffb92e; color: var(--rf-green-deep); }
+.bg-primary { background-color: var(--rf-green) !important; }
+.text-primary { color: var(--rf-green) !important; }
+
+/* ---------- Navbar ---------- */
+.rf-navbar {
+    background: rgba(255, 255, 255, .88);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(22, 184, 78, .15);
+    padding-block: .6rem;
+}
+.rf-brand { font-weight: 700; font-size: 1.25rem; display: flex; align-items: center; gap: .55rem; text-decoration: none; }
+.rf-logo {
+    width: 38px; height: 38px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--rf-green), #6BE08F);
+    color: #fff; display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 14px rgba(22, 184, 78, .35);
+}
+.rf-navbar .nav-link { color: var(--rf-ink); font-weight: 600; border-radius: 50rem; padding: .45rem 1rem !important; transition: all .2s; }
+.rf-navbar .nav-link:hover { background: var(--rf-green-soft); color: var(--rf-green-dark); }
+.rf-navbar .nav-link.active { background: var(--rf-green); color: #fff; }
+
+/* ---------- Messages flash ---------- */
+.rf-flash { border: 0; border-radius: 1rem; box-shadow: var(--rf-shadow); font-weight: 600; }
+.alert-success { background: var(--rf-green-soft); color: var(--rf-green-deep); border-left: 5px solid var(--rf-green) !important; }
+
+/* ---------- Bandeau de page ---------- */
+.page-hero {
+    position: relative; overflow: hidden; color: #fff;
+    background: linear-gradient(135deg, var(--rf-green-deep) 0%, var(--rf-green-dark) 55%, var(--rf-green) 100%);
+    padding: 4rem 0 5rem;
+}
+.page-hero::before, .page-hero::after {
+    content: ''; position: absolute; border-radius: 50%; pointer-events: none;
+}
+.page-hero::before { width: 380px; height: 380px; right: -90px; top: -140px; background: rgba(255, 255, 255, .09); }
+.page-hero::after { width: 220px; height: 220px; left: -60px; bottom: -110px; background: rgba(255, 200, 87, .22); }
+.page-hero h1 { color: #fff; font-weight: 800; }
+.page-hero p { color: rgba(255, 255, 255, .85); max-width: 620px; }
+.page-hero .eyebrow {
+    display: inline-block; background: rgba(255, 255, 255, .16); border-radius: 50rem;
+    padding: .3rem .9rem; font-size: .8rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+}
+.page-body { margin-top: -2.5rem; position: relative; z-index: 2; padding-bottom: 4rem; }
+
+/* ---------- Cartes ---------- */
+.rf-card { background: #fff; border: 0; border-radius: var(--rf-radius); box-shadow: var(--rf-shadow); }
+.rf-card-hover { transition: transform .25s ease, box-shadow .25s ease; overflow: hidden; }
+.rf-card-hover:hover { transform: translateY(-8px); box-shadow: var(--rf-shadow-lg); }
+.rf-card-hover .rf-thumb img { transition: transform .5s ease; }
+.rf-card-hover:hover .rf-thumb img { transform: scale(1.08); }
+.rf-thumb { position: relative; overflow: hidden; height: 240px; }
+.rf-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.rf-placeholder {
+    height: 100%; display: flex; align-items: center; justify-content: center; font-size: 4rem;
+    background: linear-gradient(135deg, var(--rf-green-soft), #b9ecc9);
+}
+.rf-chip {
+    position: absolute; top: 14px; left: 14px; padding: .35rem .85rem; border-radius: 50rem;
+    font-size: .78rem; font-weight: 700; background: rgba(255, 255, 255, .92); color: var(--rf-green-deep);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, .12);
+}
+.rf-chip.don { background: var(--rf-green); color: #fff; }
+.rf-chip.reparation { background: var(--rf-sun); }
+.rf-chip.transformation { background: var(--rf-green-deep); color: #fff; }
+.rf-cat { font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--rf-green-dark); }
+
+/* ---------- Barre de filtres ---------- */
+.rf-filters { background: #fff; border-radius: 50rem; box-shadow: var(--rf-shadow-lg); padding: .6rem; }
+.rf-filters .form-select { border: 0; background-color: var(--rf-cream); border-radius: 50rem; padding: .7rem 1.2rem; }
+@media (max-width: 767px) { .rf-filters { border-radius: var(--rf-radius); } }
+
+/* ---------- Formulaires ---------- */
+.form-control, .form-select { border-radius: .85rem; border: 1.5px solid #dbe9e0; padding: .7rem 1rem; }
+.form-control:focus, .form-select:focus {
+    border-color: var(--rf-green); box-shadow: 0 0 0 .25rem rgba(22, 184, 78, .18);
+}
+.form-label { font-weight: 600; color: var(--rf-green-deep); }
+
+/* ---------- Badges et tableaux ---------- */
+.badge { border-radius: 50rem; padding: .45em .85em; font-weight: 700; }
+.bg-success { background-color: var(--rf-green) !important; }
+.bg-warning { background-color: var(--rf-sun) !important; color: var(--rf-green-deep) !important; }
+.bg-dark { background-color: var(--rf-green-deep) !important; }
+.rf-table thead th {
+    background: var(--rf-green-soft); color: var(--rf-green-deep); border: 0;
+    font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; padding: 1rem;
+}
+.rf-table td { padding: 1rem; border-color: #eef4f0; }
+.rf-table tbody tr:hover { background: #fafefb; }
+
+/* ---------- Pagination ---------- */
+.pagination .page-link { color: var(--rf-green-dark); border: 0; margin: 0 .15rem; border-radius: 50% !important; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; }
+.pagination .page-item.active .page-link { background: var(--rf-green); color: #fff; }
+.pagination .page-link:hover { background: var(--rf-green-soft); }
+
+/* ---------- Fiche détail ---------- */
+.rf-info-row { display: flex; justify-content: space-between; align-items: center; padding: .85rem 0; border-bottom: 1px dashed #d8e8dd; }
+.rf-info-row:last-child { border-bottom: 0; }
+.rf-info-row span:first-child { color: var(--rf-muted); }
+.breadcrumb-item a { text-decoration: none; }
+.breadcrumb-item.active { color: var(--rf-muted); }
+
+/* ---------- Footer ---------- */
+.rf-footer { background: var(--rf-green-deep); color: rgba(255, 255, 255, .75); padding: 2rem 0; margin-top: auto; }
+.rf-footer strong { color: #fff; }

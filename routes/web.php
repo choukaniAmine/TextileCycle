@@ -2,14 +2,23 @@
 
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Atelier;
+use App\Http\Controllers\Admin\CategorieController;
+use App\Http\Controllers\Admin\VetementController as AdminVetementController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Front;
+use App\Http\Controllers\Front\DemandeDonController;
+use App\Http\Controllers\Front\MesVetementsController;
+use App\Http\Controllers\Front\VetementController as FrontVetementController;
 use Illuminate\Support\Facades\Route;
 
 // ==========================================
 // 1. FRONT OFFICE — ROUTES PUBLIQUES
 // ==========================================
 Route::get('/', [Front\HomeController::class, 'index'])->name('home');
+
+// Module 1 — Consultation publique des vêtements
+Route::get('/vetements', [FrontVetementController::class, 'index'])->name('vetements.index');
+Route::get('/vetements/{vetement}', [FrontVetementController::class, 'show'])->name('vetements.show');
 
 // Module 2 — Ateliers & Services (Public)
 Route::get('/ateliers', [Front\AtelierController::class, 'index'])->name('ateliers.index');
@@ -39,6 +48,20 @@ Route::middleware('auth')->group(function () {
     Route::get('notifications', [Front\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('notifications/{id}', [Front\NotificationController::class, 'read'])->name('notifications.read');
     Route::post('notifications/lues', [Front\NotificationController::class, 'readAll'])->name('notifications.readAll');
+
+    // Module 1 — Espace particulier (vêtements + demandes de don)
+    Route::middleware('role:particulier')->group(function () {
+        Route::resource('mes-vetements', MesVetementsController::class)
+            ->except('show')
+            ->parameters(['mes-vetements' => 'vetement']);
+
+        Route::post('/vetements/{vetement}/demander', [DemandeDonController::class, 'store'])->name('demandes-don.store');
+        Route::get('/mes-dons-demandes/recues', [DemandeDonController::class, 'recues'])->name('demandes-don.recues');
+        Route::get('/mes-dons-demandes/envoyees', [DemandeDonController::class, 'envoyees'])->name('demandes-don.envoyees');
+        Route::patch('/demandes-don/{demande}/accepter', [DemandeDonController::class, 'accepter'])->name('demandes-don.accepter');
+        Route::patch('/demandes-don/{demande}/refuser', [DemandeDonController::class, 'refuser'])->name('demandes-don.refuser');
+        Route::patch('/demandes-don/{demande}/annuler', [DemandeDonController::class, 'annuler'])->name('demandes-don.annuler');
+    });
 
     // Module 2 — Avis sur les ateliers
     Route::post('/ateliers/{atelier}/avis', [Front\AvisController::class, 'store'])->name('ateliers.avis.store');
@@ -89,6 +112,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     // Module commun — Gestion des utilisateurs
     Route::patch('users/{user}/toggle', [Admin\UserController::class, 'toggle'])->name('users.toggle');
     Route::resource('users', Admin\UserController::class)->except('show');
+
+    // Module 1 — Vêtements et catégories
+    Route::resource('categories', CategorieController::class)
+        ->except('show')
+        ->parameters(['categories' => 'categorie']);
+    Route::resource('vetements', AdminVetementController::class)->except('show');
 
     // Module 2 — Ateliers & Services
     Route::resource('ateliers', Admin\AtelierController::class);

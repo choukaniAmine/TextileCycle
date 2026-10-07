@@ -30,6 +30,28 @@
             <a class="btn btn-link btn-sm text-decoration-none d-md-none" href="{{ route('ateliers.index') }}">Ateliers</a>
             <a class="btn btn-link btn-sm text-decoration-none d-md-none" href="{{ route('associations.index') }}">Associations</a>
 
+        {{-- Liens de navigation --}}
+        <ul class="navbar-nav flex-row flex-wrap gap-3 me-auto ms-lg-4">
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('vetements.*') ? 'active fw-bold' : '' }}"
+                   href="{{ route('vetements.index') }}">Vêtements</a>
+            </li>
+
+            @auth
+                @if(auth()->user()->role === \App\Enums\UserRole::Particulier)
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('mes-vetements.*') ? 'active fw-bold' : '' }}"
+                           href="{{ route('mes-vetements.index') }}">Mes vêtements</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('demandes.*') ? 'active fw-bold' : '' }}"
+                           href="{{ route('demandes.recues') }}">Demandes reçues</a>
+                    </li>
+                @endif
+            @endauth
+        </ul>
+
+        <div class="d-flex align-items-center gap-2">
             @auth
                 @php($me = auth()->user())
                 @php($nbNotifs = $me->unreadNotifications()->count())

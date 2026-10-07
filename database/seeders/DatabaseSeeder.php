@@ -36,5 +36,6 @@ class DatabaseSeeder extends Seeder
 
         // Module 4 : demandes de réparation / transformation et interventions
         $this->call(DemandeSeeder::class);
+        $this->call(CategorieSeeder::class);
     }
 }
