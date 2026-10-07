@@ -14,6 +14,28 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-light static-top">
     <div class="container">
         <a class="navbar-brand" href="{{ route('home') }}"><i class="bi bi-recycle text-success"></i> {{ config('app.name') }}</a>
+
+        {{-- Liens de navigation --}}
+        <ul class="navbar-nav flex-row flex-wrap gap-3 me-auto ms-lg-4">
+            <li class="nav-item">
+                <a class="nav-link {{ request()->routeIs('vetements.*') ? 'active fw-bold' : '' }}"
+                   href="{{ route('vetements.index') }}">Vêtements</a>
+            </li>
+
+            @auth
+                @if(auth()->user()->role === \App\Enums\UserRole::Particulier)
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('mes-vetements.*') ? 'active fw-bold' : '' }}"
+                           href="{{ route('mes-vetements.index') }}">Mes vêtements</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('demandes.*') ? 'active fw-bold' : '' }}"
+                           href="{{ route('demandes.recues') }}">Demandes reçues</a>
+                    </li>
+                @endif
+            @endauth
+        </ul>
+
         <div class="d-flex align-items-center gap-2">
             @auth
                 <span class="me-2 d-none d-md-inline text-muted">{{ auth()->user()->name }}

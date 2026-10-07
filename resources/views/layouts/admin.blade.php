@@ -43,7 +43,18 @@
                         <a href="{{ route('admin.users.index') }}" class="nav-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-users"></i><p>Utilisateurs</p></a>
                     </li>
-                    {{-- Prochains modules : Vêtements, Réparations, Dons… --}}
+
+                    {{-- Module 1 : Vêtements --}}
+                    <li class="nav-item">
+                        <a href="{{ route('admin.vetements.index') }}" class="nav-link {{ request()->routeIs('admin.vetements.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-tshirt"></i><p>Vêtements</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('admin.categories.index') }}" class="nav-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
+                            <i class="nav-icon fas fa-tags"></i><p>Catégories</p></a>
+                    </li>
+
+                    {{-- Prochains modules : Réparations, Dons… --}}
                 </ul>
             </nav>
         </div>
