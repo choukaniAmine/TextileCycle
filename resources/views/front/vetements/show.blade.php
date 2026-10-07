@@ -1,108 +1,98 @@
 @extends('layouts.front')
+@section('title', $vetement->nom)
 
 @section('content')
 @php
     $couleurEtat = match($vetement->etat->value) {
-        'neuf' => 'success',
-        'tres_bon' => 'primary',
-        'bon' => 'info',
-        default => 'secondary',
+        'neuf' => 'success', 'tres_bon' => 'primary', 'bon' => 'info', default => 'secondary',
     };
 @endphp
 
-<section class="py-5">
-    <div class="container">
-
-        <nav aria-label="breadcrumb" class="mb-4">
-            <ol class="breadcrumb">
+<header class="page-hero" style="padding-bottom: 6rem;">
+    <div class="container position-relative">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-3">
                 <li class="breadcrumb-item"><a href="{{ route('vetements.index') }}">Vêtements</a></li>
                 <li class="breadcrumb-item">
-                    <a href="{{ route('vetements.index', ['categorie_id' => $vetement->categorie_id]) }}">
-                        {{ $vetement->categorie->nom }}
-                    </a>
+                    <a href="{{ route('vetements.index', ['categorie_id' => $vetement->categorie_id]) }}">{{ $vetement->categorie->nom }}</a>
                 </li>
                 <li class="breadcrumb-item active" aria-current="page">{{ $vetement->nom }}</li>
             </ol>
         </nav>
+        <span class="eyebrow mb-2">{{ $vetement->type->label() }}</span>
+        <h1 class="display-5 mb-0">{{ $vetement->nom }}</h1>
+    </div>
+</header>
 
-        <div class="row g-5">
+<section class="page-body">
+    <div class="container">
+        <div class="row g-4">
             {{-- Image --}}
             <div class="col-12 col-lg-6">
-                @if($vetement->image)
-                    <img src="{{ $vetement->imageUrl() }}" alt="{{ $vetement->nom }}"
-                         class="img-fluid rounded shadow w-100" style="max-height: 520px; object-fit: cover;">
-                @else
-                    <div class="d-flex align-items-center justify-content-center rounded shadow text-white"
-                         style="height: 420px; background: linear-gradient(135deg, #6c9a8b, #a8c3b8); font-size: 8rem;">
-                        👕
-                    </div>
-                @endif
+                <div class="rf-card overflow-hidden">
+                    @if($vetement->image)
+                        <img src="{{ $vetement->imageUrl() }}" alt="{{ $vetement->nom }}" class="w-100"
+                             style="max-height: 560px; object-fit: cover;">
+                    @else
+                        <div class="rf-placeholder" style="height: 420px; font-size: 8rem;">👕</div>
+                    @endif
+                </div>
             </div>
 
             {{-- Détails --}}
             <div class="col-12 col-lg-6">
-                <span class="badge bg-dark mb-2">{{ $vetement->type->label() }}</span>
-                <h1 class="fw-bold">{{ $vetement->nom }}</h1>
-                <p class="text-muted">Catégorie : {{ $vetement->categorie->nom }}</p>
+                <div class="rf-card p-4 p-md-5">
+                    <span class="rf-cat">{{ $vetement->categorie->nom }}</span>
+                    <p class="lead mt-2">{{ $vetement->description ?: 'Aucune description fournie.' }}</p>
 
-                <hr>
+                    <div class="my-4">
+                        <div class="rf-info-row"><span>Taille</span><strong>{{ $vetement->taille }}</strong></div>
+                        <div class="rf-info-row"><span>État</span><span class="badge bg-{{ $couleurEtat }}">{{ $vetement->etat->label() }}</span></div>
+                        <div class="rf-info-row"><span>Type</span><strong>{{ $vetement->type->label() }}</strong></div>
+                        <div class="rf-info-row"><span>Statut</span><span class="badge bg-{{ $vetement->statut->badge() }}">{{ $vetement->statut->label() }}</span></div>
+                        <div class="rf-info-row"><span>Proposé par</span><strong>{{ $vetement->user?->name }}</strong></div>
+                        <div class="rf-info-row"><span>Ajouté le</span><strong>{{ $vetement->created_at->format('d/m/Y') }}</strong></div>
+                    </div>
 
-                <p class="lead">{{ $vetement->description ?: 'Aucune description fournie.' }}</p>
+                    {{-- Demande de don --}}
+                    @if($vetement->statut === \App\Enums\StatutVetement::Donne)
+                        <div class="alert alert-secondary rf-flash">Ce vêtement a déjà été donné.</div>
+                    @elseif($vetement->type === \App\Enums\TypeVetement::Don)
+                        @guest
+                            <div class="alert alert-success rf-flash">
+                                <a href="{{ route('login') }}" class="fw-bold">Connectez-vous</a> pour demander ce vêtement.
+                            </div>
+                        @endguest
 
-                <ul class="list-group list-group-flush mb-4">
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span class="text-muted">Taille</span>
-                        <strong>{{ $vetement->taille }}</strong>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span class="text-muted">État</span>
-                        <span class="badge bg-{{ $couleurEtat }}">{{ $vetement->etat->label() }}</span>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span class="text-muted">Type</span>
-                        <strong>{{ $vetement->type->label() }}</strong>
-                    </li>
-                    <li class="list-group-item d-flex justify-content-between">
-                        <span class="text-muted">Ajouté le</span>
-                        <strong>{{ $vetement->created_at->format('d/m/Y') }}</strong>
-                    </li>
-                </ul>
-@include('front._flash')
+                        @auth
+                            @if($vetement->user_id === auth()->id())
+                                <div class="alert alert-success rf-flash">C'est votre vêtement.</div>
+                            @elseif($demandeEnCours)
+                                <div class="alert alert-warning rf-flash">
+                                    Votre demande est en attente de réponse.
+                                    <a href="{{ route('demandes-don.envoyees') }}" class="fw-bold">Voir mes demandes</a>
+                                </div>
+                            @else
+                                @can('demander', $vetement)
+                                    <form method="POST" action="{{ route('demandes-don.store', $vetement) }}">
+                                        @csrf
+                                        <label class="form-label">Message au propriétaire (optionnel)</label>
+                                        <textarea name="message" rows="3" maxlength="500" class="form-control mb-3"
+                                                  placeholder="Bonjour, ce vêtement m'intéresse...">{{ old('message') }}</textarea>
+                                        @error('message') <div class="text-danger small mb-2">{{ $message }}</div> @enderror
+                                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                                            <i class="bi bi-gift"></i> Demander ce vêtement
+                                        </button>
+                                    </form>
+                                @endcan
+                            @endif
+                        @endauth
+                    @endif
 
-@if($vetement->statut === \App\Enums\StatutVetement::Donne)
-    <div class="alert alert-secondary">Ce vêtement a déjà été donné.</div>
-@elseif($vetement->type === \App\Enums\TypeVetement::Don)
-    @guest
-        <div class="alert alert-info">
-            <a href="{{ route('login') }}">Connectez-vous</a> pour demander ce vêtement.
-        </div>
-    @endguest
-
-    @auth
-        @if($vetement->user_id === auth()->id())
-            <div class="alert alert-info">C'est votre vêtement.</div>
-        @elseif($demandeEnCours)
-            <div class="alert alert-warning">
-                Votre demande est en attente de réponse.
-                <a href="{{ route('demandes.envoyees') }}">Voir mes demandes</a>
-            </div>
-        @else
-            @can('demander', $vetement)
-                <form method="POST" action="{{ route('demandes.store', $vetement) }}" class="mb-4">
-                    @csrf
-                    <label class="form-label">Message au propriétaire (optionnel)</label>
-                    <textarea name="message" rows="3" maxlength="500" class="form-control mb-2"
-                              placeholder="Bonjour, ce vêtement m'intéresse...">{{ old('message') }}</textarea>
-                    @error('message') <div class="text-danger small mb-2">{{ $message }}</div> @enderror
-                    <button class="btn btn-success">Demander ce vêtement</button>
-                </form>
-            @endcan
-        @endif
-    @endauth
-@endif
-                <a href="{{ route('vetements.index') }}" class="btn btn-outline-secondary">
-                    ← Retour aux vêtements
-                </a>
+                    <a href="{{ route('vetements.index') }}" class="btn btn-outline-secondary mt-4">
+                        <i class="bi bi-arrow-left"></i> Retour aux vêtements
+                    </a>
+                </div>
             </div>
         </div>
     </div>

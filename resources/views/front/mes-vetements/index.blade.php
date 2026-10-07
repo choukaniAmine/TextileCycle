@@ -1,53 +1,55 @@
 @extends('layouts.front')
+@section('title', 'Mes vêtements')
 
 @section('content')
-<section class="py-5">
+@include('front._hero', [
+    'badge' => '👗 Mon dressing solidaire',
+    'titre' => 'Mes vêtements',
+    'sous' => 'Gérez vos annonces et répondez aux personnes intéressées.',
+    'actions' => '<a href="'.route('mes-vetements.create').'" class="btn btn-light fw-bold"><i class="bi bi-plus-circle"></i> Ajouter un vêtement</a>
+                  <a href="'.route('demandes-don.recues').'" class="btn btn-outline-light">Demandes reçues</a>
+                  <a href="'.route('demandes-don.envoyees').'" class="btn btn-outline-light">Mes demandes</a>',
+])
+
+<section class="page-body">
     <div class="container">
-        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-4">
-            <h1 class="h2 fw-bold mb-0">Mes vêtements</h1>
-            <div class="d-flex gap-2">
-                <a href="{{ route('demandes.recues') }}" class="btn btn-outline-primary">Demandes reçues</a>
-                <a href="{{ route('demandes.envoyees') }}" class="btn btn-outline-secondary">Mes demandes</a>
-                <a href="{{ route('mes-vetements.create') }}" class="btn btn-primary">+ Ajouter</a>
-            </div>
-        </div>
-
-        @include('front._flash')
-
         <div class="row g-4">
             @forelse($vetements as $v)
                 <div class="col-12 col-md-6 col-lg-4">
-                    <div class="card h-100 border-0 shadow-sm">
-                        @if($v->image)
-                            <img src="{{ $v->imageUrl() }}" class="card-img-top" alt="{{ $v->nom }}" style="height:220px;object-fit:cover;">
-                        @else
-                            <div class="d-flex align-items-center justify-content-center text-white"
-                                 style="height:220px;background:linear-gradient(135deg,#6c9a8b,#a8c3b8);font-size:4rem;">👕</div>
-                        @endif
-                        <div class="card-body d-flex flex-column">
-                            <small class="text-muted text-uppercase">{{ $v->categorie->nom }}</small>
-                            <h5 class="card-title mt-1">{{ $v->nom }}</h5>
-                            <div class="mb-2">
-                                <span class="badge bg-dark">{{ $v->type->label() }}</span>
+                    <div class="rf-card rf-card-hover h-100 d-flex flex-column">
+                        <div class="rf-thumb" style="height: 210px;">
+                            @if($v->image)
+                                <img src="{{ $v->imageUrl() }}" alt="{{ $v->nom }}">
+                            @else
+                                <div class="rf-placeholder">👕</div>
+                            @endif
+                            <span class="rf-chip {{ $v->type->value }}">{{ $v->type->label() }}</span>
+                        </div>
+
+                        <div class="p-4 d-flex flex-column flex-grow-1">
+                            <span class="rf-cat">{{ $v->categorie->nom }}</span>
+                            <h5 class="fw-bold mt-1">{{ $v->nom }}</h5>
+
+                            <div class="mb-2 d-flex flex-wrap gap-1">
                                 <span class="badge bg-{{ $v->statut->badge() }}">{{ $v->statut->label() }}</span>
                                 @if($v->demandes_en_attente_count > 0)
-                                    <a href="{{ route('demandes.recues') }}" class="badge bg-warning text-dark text-decoration-none">
-                                        {{ $v->demandes_en_attente_count }} demande(s)
+                                    <a href="{{ route('demandes-don.recues') }}" class="badge bg-warning text-decoration-none">
+                                        🔔 {{ $v->demandes_en_attente_count }} demande(s)
                                     </a>
                                 @endif
                             </div>
-                            <p class="small text-muted mb-3 flex-grow-1">Taille {{ $v->taille }} · {{ $v->etat->label() }}</p>
+                            <p class="small text-muted flex-grow-1">Taille {{ $v->taille }} · {{ $v->etat->label() }}</p>
 
-                            <div class="d-flex gap-2">
+                            <div class="d-flex flex-wrap gap-2">
                                 <a href="{{ route('vetements.show', $v) }}" class="btn btn-sm btn-outline-secondary">Voir</a>
                                 @can('update', $v)
-                                    <a href="{{ route('mes-vetements.edit', $v) }}" class="btn btn-sm btn-warning">Modifier</a>
+                                    <a href="{{ route('mes-vetements.edit', $v) }}" class="btn btn-sm btn-outline-primary">Modifier</a>
                                 @endcan
                                 @can('delete', $v)
                                     <form method="POST" action="{{ route('mes-vetements.destroy', $v) }}"
                                           onsubmit="return confirm('Supprimer ce vêtement ?')">
                                         @csrf @method('DELETE')
-                                        <button class="btn btn-sm btn-danger">Supprimer</button>
+                                        <button class="btn btn-sm btn-outline-danger">Supprimer</button>
                                     </form>
                                 @endcan
                             </div>
@@ -55,9 +57,12 @@
                     </div>
                 </div>
             @empty
-                <div class="col-12 text-center py-5">
-                    <p class="fs-5 text-muted">Vous n'avez encore ajouté aucun vêtement.</p>
-                    <a href="{{ route('mes-vetements.create') }}" class="btn btn-primary">Ajouter mon premier vêtement</a>
+                <div class="col-12">
+                    <div class="rf-card text-center py-5 px-3">
+                        <div class="display-3">🧺</div>
+                        <p class="fs-5 text-muted my-3">Vous n'avez encore ajouté aucun vêtement.</p>
+                        <a href="{{ route('mes-vetements.create') }}" class="btn btn-primary">Ajouter mon premier vêtement</a>
+                    </div>
                 </div>
             @endforelse
         </div>

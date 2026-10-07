@@ -2,13 +2,14 @@
 <div class="mb-3">
     <label class="form-label">Nom</label>
     <input name="nom" class="form-control @error('nom') is-invalid @enderror"
-           value="{{ old('nom', $vetement->nom ?? '') }}">
+           value="{{ old('nom', $vetement->nom ?? '') }}" placeholder="Ex. Veste en jean">
     @error('nom') <div class="invalid-feedback">{{ $message }}</div> @enderror
 </div>
 
 <div class="mb-3">
     <label class="form-label">Description</label>
-    <textarea name="description" rows="3" class="form-control @error('description') is-invalid @enderror">{{ old('description', $vetement->description ?? '') }}</textarea>
+    <textarea name="description" rows="3" class="form-control @error('description') is-invalid @enderror"
+              placeholder="Matière, histoire, défauts éventuels...">{{ old('description', $vetement->description ?? '') }}</textarea>
     @error('description') <div class="invalid-feedback">{{ $message }}</div> @enderror
 </div>
 
@@ -16,7 +17,7 @@
     <div class="col-md-3">
         <label class="form-label">Taille</label>
         <input name="taille" class="form-control @error('taille') is-invalid @enderror"
-               value="{{ old('taille', $vetement->taille ?? '') }}">
+               value="{{ old('taille', $vetement->taille ?? '') }}" placeholder="M, 40...">
         @error('taille') <div class="invalid-feedback">{{ $message }}</div> @enderror
     </div>
     <div class="col-md-3">
@@ -53,9 +54,11 @@
     <input type="file" name="image" class="form-control @error('image') is-invalid @enderror" accept="image/*">
     @error('image') <div class="invalid-feedback">{{ $message }}</div> @enderror
     @if(isset($vetement) && $vetement->image)
-        <img src="{{ $vetement->imageUrl() }}" width="120" class="mt-2 rounded">
+        <img src="{{ $vetement->imageUrl() }}" width="140" class="mt-3 rounded-4 shadow-sm" alt="">
     @endif
 </div>
 
-<button class="btn btn-primary">Enregistrer</button>
-<a href="{{ route('mes-vetements.index') }}" class="btn btn-outline-secondary">Annuler</a>
+<div class="d-flex gap-2 mt-4">
+    <button class="btn btn-primary btn-lg"><i class="bi bi-check2-circle"></i> Enregistrer</button>
+    <a href="{{ route('mes-vetements.index') }}" class="btn btn-outline-secondary btn-lg">Annuler</a>
+</div>

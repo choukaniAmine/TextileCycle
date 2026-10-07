@@ -21,7 +21,7 @@ class DemandeDonController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('front.demandes.recues', compact('demandes'));
+        return view('front.mes-dons-demandes.recues', compact('demandes'));
     }
 
     /** Demandes que J'AI envoyées. */
@@ -32,7 +32,7 @@ class DemandeDonController extends Controller
             ->latest()
             ->paginate(10);
 
-        return view('front.demandes.envoyees', compact('demandes'));
+        return view('front.mes-dons-demandes.envoyees', compact('demandes'));
     }
 
     public function store(Request $request, Vetement $vetement)
@@ -58,7 +58,7 @@ class DemandeDonController extends Controller
             'statut' => StatutDemande::EnAttente,
         ]);
 
-        return redirect()->route('demandes.envoyees')->with('success', 'Votre demande a été envoyée.');
+        return redirect()->route('demandes-don.envoyees')->with('success', 'Votre demande a été envoyée.');
     }
 
     public function accepter(DemandeDon $demande)
