@@ -18,8 +18,13 @@
             <li class="nav-item"><a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a></li>
             <li class="nav-item d-none d-sm-inline-block"><a href="{{ route('home') }}" class="nav-link">Voir le site</a></li>
         </ul>
-        <ul class="navbar-nav ml-auto">
-            <li class="nav-item"><span class="nav-link">{{ auth()->user()->name }}</span></li>
+        <ul class="navbar-nav ml-auto align-items-center">
+            <li class="nav-item d-flex align-items-center">
+                @if(auth()->user()->avatar)
+                    <img src="{{ auth()->user()->avatarUrl() }}" alt="{{ auth()->user()->name }}" class="img-circle elevation-1 mr-2" style="width:30px;height:30px;object-fit:cover;">
+                @endif
+                <span class="nav-link">{{ auth()->user()->name }}</span>
+            </li>
             <li class="nav-item">
                 <form method="POST" action="{{ route('logout') }}" class="m-0">@csrf
                     <button class="btn btn-link nav-link"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>

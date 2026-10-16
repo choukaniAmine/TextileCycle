@@ -10,10 +10,11 @@
             <input type="email" name="email" value="{{ old('email') }}" class="form-control @error('email') is-invalid @enderror" required autofocus>
             @error('email')<div class="invalid-feedback">{{ $message }}</div>@enderror
         </div>
-        <div class="mb-3">
-            <label class="form-label">Mot de passe</label>
-            <input type="password" name="password" class="form-control" required>
+        <div class="mb-3 d-flex justify-content-between align-items-center">
+            <label class="form-label mb-0">Mot de passe</label>
+            <a href="{{ route('password.request') }}" class="small">Mot de passe oublié ?</a>
         </div>
+        <input type="password" name="password" class="form-control mb-3" required>
         <div class="form-check mb-3">
             <input type="checkbox" name="remember" id="remember" class="form-check-input">
             <label for="remember" class="form-check-label">Se souvenir de moi</label>

@@ -5,11 +5,30 @@ namespace Database\Seeders;
 use App\Enums\UserRole;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\PermissionRegistrar;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // Reset cached roles and permissions
+        app()[PermissionRegistrar::class]->forgetCachedPermissions();
+
+        // Create Spatie Permissions
+        $permissionBackoffice = Permission::firstOrCreate(['name' => 'access-backoffice']);
+        $permissionUsers = Permission::firstOrCreate(['name' => 'manage-users']);
+
+        // Create Spatie Roles
+        $adminRole = Role::firstOrCreate(['name' => UserRole::Admin->value]);
+        Role::firstOrCreate(['name' => UserRole::Particulier->value]);
+        Role::firstOrCreate(['name' => UserRole::Atelier->value]);
+        Role::firstOrCreate(['name' => UserRole::Association->value]);
+
+        // Assign permissions to admin role
+        $adminRole->syncPermissions([$permissionBackoffice, $permissionUsers]);
+
         // Module commun : utilisateurs
         User::factory()->role(UserRole::Admin)->create([
             'name' => 'Administrateur', 'email' => 'admin@refashion.test', 'city' => 'Tunis',

@@ -30,4 +30,14 @@ class UserFactory extends Factory
     {
         return $this->state(fn () => ['role' => $role]);
     }
+
+    public function configure(): static
+    {
+        return $this->afterCreating(function (\App\Models\User $user) {
+            if ($user->role) {
+                \Spatie\Permission\Models\Role::firstOrCreate(['name' => $user->role->value]);
+                $user->assignRole($user->role->value);
+            }
+        });
+    }
 }

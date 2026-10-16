@@ -4,7 +4,7 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\Atelier;
 use App\Http\Controllers\Admin\CategorieController;
 use App\Http\Controllers\Admin\VetementController as AdminVetementController;
-use App\Http\Controllers\Auth\AuthController;
+
 use App\Http\Controllers\Front;
 use App\Http\Controllers\Front\DemandeDonController;
 use App\Http\Controllers\Front\MesVetementsController;
@@ -28,21 +28,22 @@ Route::get('/ateliers/{atelier}', [Front\AtelierController::class, 'show'])->nam
 Route::get('/associations', [Front\AssociationController::class, 'index'])->name('associations.index');
 Route::get('/associations/{association}', [Front\AssociationController::class, 'show'])->name('associations.show');
 
-// Auth — Invités uniquement
-Route::middleware('guest')->group(function () {
-    Route::get('/connexion', [AuthController::class, 'showLogin'])->name('login');
-    Route::post('/connexion', [AuthController::class, 'login']);
-    Route::get('/inscription', [AuthController::class, 'showRegister'])->name('register');
-    Route::post('/inscription', [AuthController::class, 'register']);
-});
+// Auth — Invités uniquement (Fortify gère /login, /register, /forgot-password, /reset-password)
+// Alias pour la compatibilité des anciennes URL françaises
+Route::get('/connexion', fn () => redirect()->route('login'));
+Route::get('/inscription', fn () => redirect()->route('register'));
+// POST rétrocompatibles (les formulaires existants envoient vers /connexion et /inscription)
+Route::post('/connexion', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store'])->middleware('guest');
+Route::post('/inscription', [\Laravel\Fortify\Http\Controllers\RegisteredUserController::class, 'store'])->middleware('guest');
 
 // ==========================================
 // 2. FRONT OFFICE — UTILISATEUR CONNECTÉ
 // ==========================================
 Route::middleware('auth')->group(function () {
-    Route::post('/deconnexion', [AuthController::class, 'logout'])->name('logout');
     Route::get('/profil', [Front\ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profil', [Front\ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profil/avatar', [Front\ProfileController::class, 'destroyAvatar'])->name('profile.avatar.destroy');
+    Route::delete('/profil', [Front\ProfileController::class, 'destroyAccount'])->name('profile.destroy');
 
     // Notifications (tous les rôles)
     Route::get('notifications', [Front\NotificationController::class, 'index'])->name('notifications.index');

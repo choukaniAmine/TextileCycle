@@ -30,7 +30,9 @@ class UserController extends Controller
     {
         $data = $request->validate($this->rules(passwordRequired: true));
         $data['is_active'] = $request->boolean('is_active');
-        User::create($data);
+        $user = User::create($data);
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => $data['role']]);
+        $user->assignRole($data['role']);
 
         return redirect()->route('admin.users.index')->with('success', 'Utilisateur créé.');
     }
@@ -55,6 +57,8 @@ class UserController extends Controller
         }
 
         $user->update($data);
+        \Spatie\Permission\Models\Role::firstOrCreate(['name' => $data['role']]);
+        $user->syncRoles([$data['role']]);
 
         return redirect()->route('admin.users.index')->with('success', 'Utilisateur mis à jour.');
     }
@@ -74,6 +78,11 @@ class UserController extends Controller
         if ($user->is($request->user())) {
             return back()->with('error', 'Vous ne pouvez pas supprimer votre propre compte.');
         }
+
+        if ($user->avatar && \Illuminate\Support\Facades\Storage::disk('public')->exists($user->avatar)) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($user->avatar);
+        }
+
         $user->delete();
 
         return redirect()->route('admin.users.index')->with('success', 'Utilisateur supprimé.');

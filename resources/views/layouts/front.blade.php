@@ -92,7 +92,11 @@
                     <div class="dropdown">
                         <a class="rf-user-toggle dropdown-toggle" href="#" role="button"
                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <span class="rf-avatar">{{ mb_strtoupper(mb_substr($me->name, 0, 1)) }}</span>
+                            @if($me->avatar)
+                                <img src="{{ $me->avatarUrl() }}" alt="{{ $me->name }}" class="rf-avatar rounded-circle object-fit-cover" style="width:36px;height:36px;">
+                            @else
+                                <span class="rf-avatar">{{ mb_strtoupper(mb_substr($me->name, 0, 1)) }}</span>
+                            @endif
                             <span class="rf-user-name">{{ \Illuminate\Support\Str::before($me->name, ' ') }}</span>
                         </a>
 
@@ -146,11 +150,23 @@
     </div>
 </nav>
 
-@if (session('success') || session('error'))
+@auth
+    @if (!auth()->user()->hasVerifiedEmail())
+        <div class="bg-warning text-dark py-2 text-center small">
+            <i class="bi bi-exclamation-triangle-fill me-1"></i> Votre adresse e-mail n'est pas encore vérifiée.
+            <form method="POST" action="{{ route('verification.send') }}" class="d-inline">
+                @csrf
+                <button type="submit" class="btn btn-link btn-sm p-0 align-baseline text-dark fw-bold">Renvoyer le lien</button>
+            </form>
+        </div>
+    @endif
+@endauth
+
+@if (session('success') || session('error') || session('status'))
     <div class="container mt-3">
-        <div class="alert rf-flash alert-{{ session('success') ? 'success' : 'danger' }} mb-0">
-            <i class="bi {{ session('success') ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill' }} me-2"></i>
-            {{ session('success') ?? session('error') }}
+        <div class="alert rf-flash alert-{{ session('error') ? 'danger' : 'success' }} mb-0">
+            <i class="bi {{ session('error') ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill' }} me-2"></i>
+            {{ session('success') ?? session('error') ?? session('status') }}
         </div>
     </div>
 @endif

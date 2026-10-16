@@ -13,7 +13,14 @@ class EnsureUserRole
     {
         $user = $request->user();
 
-        if (! $user || ! in_array($user->role->value, $roles, true)) {
+        if (! $user) {
+            abort(403, 'Accès réservé.');
+        }
+
+        $hasEnumRole = in_array($user->role?->value, $roles, true);
+        $hasSpatieRole = $user->hasAnyRole($roles);
+
+        if (! $hasEnumRole && ! $hasSpatieRole) {
             abort(403, 'Accès réservé.');
         }
 
