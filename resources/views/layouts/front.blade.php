@@ -165,42 +165,18 @@
 @if (session('success') || session('error') || session('status'))
     <div class="container mt-3">
         <div class="alert rf-flash alert-{{ session('error') ? 'danger' : 'success' }} mb-0">
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-                <div>
-                    <i class="bi {{ session('error') ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill' }} me-2"></i>
-                    @if (session('status') === 'verification-link-sent')
-                        Un nouveau lien de vérification a été envoyé à votre adresse e-mail.
-                    @elseif (session('status') === 'passwords.sent' || session('status') === 'We have emailed your password reset link.')
-                        Un lien de réinitialisation vous a été envoyé par e-mail.
-                    @elseif (session('status') === 'passwords.reset' || session('status') === 'Your password has been reset.')
-                        Votre mot de passe a été réinitialisé avec succès !
-                    @elseif (session('status'))
-                        {{ __(session('status')) }}
-                    @else
-                        {{ session('success') ?? session('error') }}
-                    @endif
-                </div>
-
-                @if (app()->environment('local') && config('mail.default') === 'log' && (session('status') === 'verification-link-sent' || session('status') === 'passwords.sent' || session('status') === 'We have emailed your password reset link.'))
-                    @php
-                        $logPath = storage_path('logs/laravel.log');
-                        $lastLink = null;
-                        if (file_exists($logPath)) {
-                            $logContent = file_get_contents($logPath);
-                            if (preg_match_all('#https?://[^\s"\'<>]+(?:reset-password|email/verify)[^\s"\'<>]*#', $logContent, $matches)) {
-                                $lastLink = end($matches[0]);
-                            }
-                        }
-                    @endphp
-                    @if ($lastLink)
-                        <div>
-                            <a href="{{ $lastLink }}" class="btn btn-sm btn-outline-dark bg-white fw-bold shadow-sm">
-                                <i class="bi bi-envelope-open me-1"></i> [Mode local/démo] Ouvrir le lien généré
-                            </a>
-                        </div>
-                    @endif
-                @endif
-            </div>
+            <i class="bi {{ session('error') ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill' }} me-2"></i>
+            @if (session('status') === 'verification-link-sent')
+                Un nouveau lien de vérification a été envoyé à votre adresse e-mail.
+            @elseif (session('status') === 'passwords.sent' || session('status') === 'We have emailed your password reset link.')
+                Un lien de réinitialisation vous a été envoyé par e-mail.
+            @elseif (session('status') === 'passwords.reset' || session('status') === 'Your password has been reset.')
+                Votre mot de passe a été réinitialisé avec succès !
+            @elseif (session('status'))
+                {{ __(session('status')) }}
+            @else
+                {{ session('success') ?? session('error') }}
+            @endif
         </div>
     </div>
 @endif
