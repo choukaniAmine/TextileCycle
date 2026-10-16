@@ -7,11 +7,7 @@
         Saisissez l'adresse e-mail associée à votre compte. Nous vous enverrons un lien sécurisé avec un jeton temporaire pour réinitialiser votre mot de passe.
     </p>
 
-    @if (session('status'))
-        <div class="alert alert-success" role="alert">
-            {{ session('status') }}
-        </div>
-    @endif
+
 
     <form method="POST" action="{{ route('password.email') }}">
         @csrf
