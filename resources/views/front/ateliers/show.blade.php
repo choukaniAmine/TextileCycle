@@ -478,6 +478,30 @@
                                     </div>
                                 </div>
                             </div>
+
+                            {{-- Modal ReFashion personnalisé pour messages & alertes --}}
+                            <div class="modal fade" id="devisAlertModal" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered" style="max-width: 420px;">
+                                    <div class="modal-content border-0 shadow-lg text-center p-3" style="border-radius: 20px;">
+                                        <div class="modal-body py-4 px-3">
+                                            <div class="mb-3 mx-auto d-flex align-items-center justify-content-center rounded-circle"
+                                                 id="devisModalIconWrap"
+                                                 style="width: 64px; height: 64px; background: #fff4e5; color: #ff9800;">
+                                                <i class="bi bi-exclamation-triangle-fill fs-2" id="devisModalIcon"></i>
+                                            </div>
+                                            <h5 class="fw-bold mb-2 text-dark" id="devisModalTitle">Sélection requise</h5>
+                                            <p class="text-muted small mb-4" id="devisModalMessage">
+                                                Veuillez sélectionner au moins une prestation en cochant ou augmentant la quantité.
+                                            </p>
+                                            <button type="button" class="btn fw-semibold px-4 py-2 rounded-pill text-white shadow-sm"
+                                                    data-bs-dismiss="modal"
+                                                    style="background: linear-gradient(135deg, #0f7038, #28c76f); border: none; min-width: 140px;">
+                                                Compris
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </form>
                     @else
                         <p class="text-muted small mb-0">Cet atelier ne propose pas encore de prestations configurées pour la simulation.</p>
@@ -833,6 +857,40 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    function showDevisModalAlert(message, title = 'Sélection requise', type = 'warning') {
+        const modalEl = document.getElementById('devisAlertModal');
+        if (!modalEl) {
+            alert(message);
+            return;
+        }
+        const modalTitle = document.getElementById('devisModalTitle');
+        const modalMessage = document.getElementById('devisModalMessage');
+        const modalIcon = document.getElementById('devisModalIcon');
+        const modalIconWrap = document.getElementById('devisModalIconWrap');
+
+        if (modalTitle) modalTitle.textContent = title;
+        if (modalMessage) modalMessage.textContent = message;
+
+        if (modalIconWrap && modalIcon) {
+            if (type === 'warning') {
+                modalIconWrap.style.background = '#fff4e5';
+                modalIconWrap.style.color = '#ff9800';
+                modalIcon.className = 'bi bi-exclamation-triangle-fill fs-2';
+            } else if (type === 'danger') {
+                modalIconWrap.style.background = '#fde8e8';
+                modalIconWrap.style.color = '#e53e3e';
+                modalIcon.className = 'bi bi-x-circle-fill fs-2';
+            } else {
+                modalIconWrap.style.background = '#e8f5e9';
+                modalIconWrap.style.color = '#0f7038';
+                modalIcon.className = 'bi bi-check-circle-fill fs-2';
+            }
+        }
+
+        const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modal.show();
+    }
+
     // Soumission AJAX
     async function submitDevis(actionType = 'download') {
         let totalQty = 0;
@@ -841,7 +899,11 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         if (totalQty === 0) {
-            alert('Veuillez sélectionner au moins une prestation en cochant ou augmentant la quantité.');
+            showDevisModalAlert(
+                'Veuillez sélectionner au moins une prestation en cochant la case ou en augmentant la quantité avec les boutons + / -.',
+                'Aucune prestation sélectionnée',
+                'warning'
+            );
             return;
         }
 
@@ -881,7 +943,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     window.open(data.stream_url, '_blank');
                 }
             } else {
-                alert(data.message || 'Une erreur est survenue lors de la création du devis.');
+                showDevisModalAlert(
+                    data.message || 'Une erreur est survenue lors de la création du devis.',
+                    'Erreur',
+                    'danger'
+                );
             }
         } catch (err) {
             console.error(err);
