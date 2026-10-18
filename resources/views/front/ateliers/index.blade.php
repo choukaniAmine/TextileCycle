@@ -539,58 +539,33 @@ document.addEventListener('DOMContentLoaded', function () {
 {{-- ── Leaflet JS & Carte Interactive (Option C) ── --}}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN2GqaI=" crossorigin=""></script>
 <script>
-(function () {
+document.addEventListener('DOMContentLoaded', function () {
     // Données géographiques depuis PHP
     const ateliersGeo = @json($ateliersGeo);
-
-    if (!ateliersGeo || ateliersGeo.length === 0) return;
 
     let map         = null;
     let markers     = [];
     let mapInited   = false;
-    const mapSection = document.getElementById('map-section');
-    const toggleBtn  = document.getElementById('btn-toggle-map');
+    let greenIcon   = null;
+    let userIcon    = null;
+    let userMarker  = null;
+
+    const mapSection  = document.getElementById('map-section');
+    const toggleBtn   = document.getElementById('btn-toggle-map');
     const toggleLabel = document.getElementById('map-toggle-label');
+    const locateBtn   = document.getElementById('btn-locate');
 
-    // Icône personnalisée verte
-    const greenIcon = L.divIcon({
-        className: '',
-        html: `<div style="
-            width:32px; height:32px;
-            background:linear-gradient(135deg,#0f7038,#28c76f);
-            border-radius:50% 50% 50% 0;
-            transform:rotate(-45deg);
-            border:3px solid #fff;
-            box-shadow:0 2px 8px rgba(15,112,56,.5);
-        "></div>`,
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -34],
-    });
-
-    const userIcon = L.divIcon({
-        className: '',
-        html: `<div style="
-            width:28px; height:28px;
-            background:linear-gradient(135deg,#1e88e5,#42a5f5);
-            border-radius:50%;
-            border:3px solid #fff;
-            box-shadow:0 2px 8px rgba(30,136,229,.6);
-        "></div>`,
-        iconSize: [28, 28],
-        iconAnchor: [14, 14],
-    });
+    if (!mapSection || !toggleBtn) return;
 
     // Construire le HTML du popup
     function buildPopup(a) {
         const stars = Array.from({length: 5}, (_, i) =>
-            `<i>${i < Math.round(a.moyenne_note) ? '★' : '☆'}</i>`
+            i < Math.round(a.moyenne_note) ? '★' : '☆'
         ).join('');
-
         return `<div class="map-popup">
             <div class="map-popup-title">${a.nom}</div>
-            <div class="map-popup-ville"><i>📍</i> ${a.ville} · ${a.adresse}</div>
-            <div class="map-popup-stars">${stars}
+            <div class="map-popup-ville">📍 ${a.ville} · ${a.adresse}</div>
+            <div class="map-popup-stars" style="color:#f5a623;">${stars}
                 <span style="color:#6c757d;font-size:.75rem;margin-left:4px;">
                     ${a.moyenne_note > 0 ? a.moyenne_note + '/5' : 'Nouveau'}
                     ${a.nombre_avis > 0 ? '(' + a.nombre_avis + ' avis)' : ''}
@@ -603,15 +578,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Placer / rafraîchir les marqueurs
     function updateMapMarkers(data) {
-        // Supprimer anciens marqueurs
+        if (!map) return;
         markers.forEach(m => map.removeLayer(m));
         markers = [];
-
         if (!data || data.length === 0) return;
 
         const bounds = [];
         data.forEach(a => {
-            if (!a.latitude || !a.longitude) return;
+            if (a.latitude == null || a.longitude == null) return;
             const m = L.marker([a.latitude, a.longitude], { icon: greenIcon })
                 .bindPopup(buildPopup(a), { maxWidth: 260 })
                 .addTo(map);
@@ -622,25 +596,51 @@ document.addEventListener('DOMContentLoaded', function () {
         if (bounds.length > 0) {
             map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
         }
-
-        // Mettre à jour le compteur
         const counter = document.getElementById('map-marker-count');
         if (counter) counter.textContent = data.length;
     }
 
-    // Exposer globalement pour le AJAX filter sync
-    window.leafletMap    = null;
+    // Exposer globalement pour sync AJAX
+    window.leafletMap       = null;
     window.updateMapMarkers = updateMapMarkers;
 
-    // Initialiser la carte (une seule fois, au premier affichage)
+    // Initialiser la carte (une seule fois)
     function initMap() {
         if (mapInited) return;
         mapInited = true;
 
+        // Créer les icônes ici (après que Leaflet soit chargé)
+        greenIcon = L.divIcon({
+            className: '',
+            html: `<div style="
+                width:32px;height:32px;
+                background:linear-gradient(135deg,#0f7038,#28c76f);
+                border-radius:50% 50% 50% 0;
+                transform:rotate(-45deg);
+                border:3px solid #fff;
+                box-shadow:0 2px 8px rgba(15,112,56,.5);
+            "></div>`,
+            iconSize: [32, 32],
+            iconAnchor: [16, 32],
+            popupAnchor: [0, -34],
+        });
+
+        userIcon = L.divIcon({
+            className: '',
+            html: `<div style="
+                width:28px;height:28px;
+                background:linear-gradient(135deg,#1e88e5,#42a5f5);
+                border-radius:50%;
+                border:3px solid #fff;
+                box-shadow:0 2px 8px rgba(30,136,229,.6);
+            "></div>`,
+            iconSize: [28, 28],
+            iconAnchor: [14, 14],
+        });
+
         map = L.map('leaflet-map', {
-            center: [36.8065, 10.1815],
+            center: [36.0, 9.5],
             zoom: 7,
-            zoomControl: true,
         });
 
         window.leafletMap = map;
@@ -653,50 +653,47 @@ document.addEventListener('DOMContentLoaded', function () {
         updateMapMarkers(ateliersGeo);
     }
 
-    // Toggle affichage carte
+    // ── Toggle carte ──
     toggleBtn.addEventListener('click', function () {
-        const visible = mapSection.style.display !== 'none';
-        if (visible) {
+        const isVisible = mapSection.style.display !== 'none';
+        if (isVisible) {
             mapSection.style.display = 'none';
             toggleLabel.textContent = 'Carte';
-            toggleBtn.style.color = '#0f7038';
         } else {
             mapSection.style.display = 'block';
             toggleLabel.textContent = 'Masquer';
-            toggleBtn.style.color = '#dc3545';
-            // Initialiser la carte si pas encore fait
             initMap();
-            // Invalider la taille Leaflet (car la div était cachée)
-            setTimeout(() => map && map.invalidateSize(), 100);
+            // Leaflet a besoin que la div soit visible pour calculer les dimensions
+            setTimeout(() => { if (map) map.invalidateSize(); }, 150);
         }
     });
 
-    // Géolocalisation : "Me géolocaliser"
-    let userMarker = null;
-    document.getElementById('btn-locate').addEventListener('click', function () {
-        if (!map) {
-            // Ouvrir la carte d'abord
-            mapSection.style.display = 'block';
-            toggleLabel.textContent = 'Masquer';
-            initMap();
-            setTimeout(() => {
-                map.invalidateSize();
-                geolocate();
-            }, 200);
-            return;
-        }
-        geolocate();
-    });
+    // ── Géolocalisation ──
+    if (locateBtn) {
+        locateBtn.addEventListener('click', function () {
+            if (!map) {
+                mapSection.style.display = 'block';
+                toggleLabel.textContent = 'Masquer';
+                initMap();
+                setTimeout(() => {
+                    map.invalidateSize();
+                    geolocate();
+                }, 200);
+                return;
+            }
+            geolocate();
+        });
+    }
 
     function geolocate() {
-        const btn = document.getElementById('btn-locate');
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Localisation…';
-        btn.disabled = true;
+        if (!locateBtn) return;
+        locateBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Localisation…';
+        locateBtn.disabled  = true;
 
         if (!navigator.geolocation) {
-            alert('La géolocalisation n\'est pas supportée par votre navigateur.');
-            btn.innerHTML = '<i class="bi bi-crosshair2"></i> Me géolocaliser';
-            btn.disabled = false;
+            alert('Géolocalisation non supportée par votre navigateur.');
+            locateBtn.innerHTML = '<i class="bi bi-crosshair2"></i> Me géolocaliser';
+            locateBtn.disabled  = false;
             return;
         }
 
@@ -705,52 +702,45 @@ document.addEventListener('DOMContentLoaded', function () {
                 const lat = pos.coords.latitude;
                 const lng = pos.coords.longitude;
 
-                // Retirer l'ancien marqueur utilisateur
                 if (userMarker) map.removeLayer(userMarker);
-
                 userMarker = L.marker([lat, lng], { icon: userIcon })
                     .addTo(map)
                     .bindPopup('<div style="padding:8px;font-weight:600;color:#1e88e5;">📍 Vous êtes ici</div>')
                     .openPopup();
 
-                // Calculer l'atelier le plus proche
-                let nearest = null;
-                let minDist = Infinity;
-                ateliersGeo.forEach(a => {
-                    if (!a.latitude) return;
-                    const d = Math.sqrt(Math.pow(a.latitude - lat, 2) + Math.pow(a.longitude - lng, 2));
+                // Atelier le plus proche
+                let nearest = null, minDist = Infinity;
+                (ateliersGeo || []).forEach(a => {
+                    if (a.latitude == null) return;
+                    const d = Math.hypot(a.latitude - lat, a.longitude - lng);
                     if (d < minDist) { minDist = d; nearest = a; }
                 });
 
                 if (nearest) {
-                    // Centrer entre l'utilisateur et l'atelier le plus proche
                     map.fitBounds([[lat, lng], [nearest.latitude, nearest.longitude]], { padding: [60, 60], maxZoom: 13 });
-                    // Ouvrir le popup de l'atelier le plus proche
-                    const nearestMarker = markers.find(m => {
+                    const nm = markers.find(m => {
                         const ll = m.getLatLng();
-                        return Math.abs(ll.lat - nearest.latitude) < 0.0001 && Math.abs(ll.lng - nearest.longitude) < 0.0001;
+                        return Math.abs(ll.lat - nearest.latitude) < 0.001 && Math.abs(ll.lng - nearest.longitude) < 0.001;
                     });
-                    if (nearestMarker) {
-                        setTimeout(() => nearestMarker.openPopup(), 600);
-                    }
+                    if (nm) setTimeout(() => nm.openPopup(), 700);
                 } else {
                     map.setView([lat, lng], 12);
                 }
 
-                btn.innerHTML = '✅ Géolocalisé !';
+                locateBtn.innerHTML = '✅ Géolocalisé !';
                 setTimeout(() => {
-                    btn.innerHTML = '<i class="bi bi-crosshair2"></i> Me géolocaliser';
-                    btn.disabled = false;
+                    locateBtn.innerHTML = '<i class="bi bi-crosshair2"></i> Me géolocaliser';
+                    locateBtn.disabled  = false;
                 }, 3000);
             },
             function () {
-                alert('Impossible d\'accéder à votre position. Veuillez autoriser la géolocalisation.');
-                btn.innerHTML = '<i class="bi bi-crosshair2"></i> Me géolocaliser';
-                btn.disabled = false;
+                alert('Impossible d\'accéder à votre position.');
+                locateBtn.innerHTML = '<i class="bi bi-crosshair2"></i> Me géolocaliser';
+                locateBtn.disabled  = false;
             },
             { timeout: 10000, maximumAge: 60000 }
         );
     }
-})();
+});
 </script>
 @endpush
