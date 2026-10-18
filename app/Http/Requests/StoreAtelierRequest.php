@@ -23,6 +23,8 @@ class StoreAtelierRequest extends FormRequest
             'email' => ['nullable', 'email', 'max:150'],
             'image' => ['nullable', 'image', 'mimes:jpeg,png,jpg,webp,svg', 'max:2048'],
             'horaires' => ['nullable', 'string', 'max:255'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'est_actif' => ['sometimes', 'boolean'],
         ];
     }

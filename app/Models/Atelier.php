@@ -21,12 +21,24 @@ class Atelier extends Model
         'email',
         'image',
         'horaires',
+        'latitude',
+        'longitude',
         'est_actif',
     ];
 
     protected $casts = [
         'est_actif' => 'boolean',
+        'latitude' => 'float',
+        'longitude' => 'float',
     ];
+
+    /**
+     * Vérifie si l'atelier a des coordonnées valides.
+     */
+    public function hasCoordinates(): bool
+    {
+        return !is_null($this->latitude) && !is_null($this->longitude);
+    }
 
     /**
      * Un atelier propose plusieurs services.

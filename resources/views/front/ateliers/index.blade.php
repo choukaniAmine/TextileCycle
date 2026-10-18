@@ -3,6 +3,7 @@
 @section('title', 'Ateliers & Services de Réparation')
 
 @push('styles')
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
 <style>
     /* ── Hero ── */
     .hero-ateliers {
@@ -151,6 +152,87 @@
         cursor:pointer; transition:opacity .2s;
     }
     #scrollTop.visible { display:flex; }
+
+    /* ── Leaflet Carte Interactive ── */
+    #map-section {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 24px rgba(0,0,0,.06);
+        margin-bottom: 28px;
+    }
+    #map-section .map-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #e8f5e9;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        background: #f8fffe;
+    }
+    #leaflet-map {
+        height: 400px;
+        width: 100%;
+        z-index: 1;
+    }
+    .leaflet-popup-content-wrapper {
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,.15) !important;
+        border: none !important;
+    }
+    .leaflet-popup-content { margin: 0 !important; padding: 0 !important; }
+    .map-popup {
+        padding: 14px 16px;
+        min-width: 200px;
+        font-family: inherit;
+    }
+    .map-popup .map-popup-title {
+        font-weight: 700;
+        font-size: .95rem;
+        color: #0f7038;
+        margin-bottom: 4px;
+    }
+    .map-popup .map-popup-ville {
+        font-size: .8rem;
+        color: #6c757d;
+        margin-bottom: 8px;
+    }
+    .map-popup .map-popup-stars { color: #f5a623; font-size: .8rem; }
+    .map-popup .map-popup-services { font-size: .78rem; color: #495057; margin-top: 4px; }
+    .map-popup .btn-popup {
+        display: block;
+        background: linear-gradient(135deg,#0f7038,#28c76f);
+        color: #fff !important;
+        border-radius: 8px;
+        padding: 6px 12px;
+        text-align: center;
+        text-decoration: none;
+        font-size: .82rem;
+        font-weight: 600;
+        margin-top: 10px;
+    }
+    #btn-locate {
+        background: linear-gradient(135deg,#0f7038,#28c76f);
+        border: none; color:#fff;
+        border-radius: 10px; padding: 8px 16px;
+        font-weight: 600; font-size: .88rem;
+        cursor: pointer; transition: opacity .2s;
+        display: flex; align-items: center; gap: 6px;
+    }
+    #btn-locate:hover { opacity: .85; }
+    .map-toggle-btn {
+        cursor: pointer;
+        color: #0f7038;
+        font-size: .85rem;
+        font-weight: 600;
+        border: none;
+        background: none;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
 </style>
 @endpush
 
@@ -248,7 +330,11 @@
                       id="result-count"
                       style="background:#0f7038; font-size:.8rem;">{{ $ateliers->total() }}</span>
             </h5>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 align-items-center">
+                <button class="map-toggle-btn" id="btn-toggle-map" title="Afficher / Masquer la carte">
+                    <i class="bi bi-map-fill text-success"></i>
+                    <span id="map-toggle-label">Carte</span>
+                </button>
                 <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="view-grid" title="Grille">
                     <i class="bi bi-grid-3x3-gap"></i>
                 </button>
@@ -256,6 +342,25 @@
                     <i class="bi bi-list-ul"></i>
                 </button>
             </div>
+        </div>
+
+        {{-- ── Carte Leaflet Interactive (Option C) ── --}}
+        <div id="map-section" style="display:none;">
+            <div class="map-header">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi bi-map-fill text-success fs-5"></i>
+                    <div>
+                        <div class="fw-bold text-dark" style="font-size:.95rem;">Carte interactive des ateliers</div>
+                        <div class="text-muted" style="font-size:.75rem;">
+                            <span id="map-marker-count">{{ count($ateliersGeo) }}</span> atelier(s) géolocalisé(s) · OpenStreetMap
+                        </div>
+                    </div>
+                </div>
+                <button id="btn-locate" type="button">
+                    <i class="bi bi-crosshair2"></i> Me géolocaliser
+                </button>
+            </div>
+            <div id="leaflet-map"></div>
         </div>
 
         {{-- ── Loading ── --}}
@@ -388,6 +493,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 pagination.style.display = 'block';
                 // Rebind pagination clicks
                 bindPagination();
+                // Sync carte Leaflet avec les résultats filtrés
+                if (data.ateliers_geo && window.leafletMap) {
+                    updateMapMarkers(data.ateliers_geo);
+                }
             })
             .catch(() => {
                 loading.style.display = 'none';
@@ -425,5 +534,223 @@ document.addEventListener('DOMContentLoaded', function () {
     bindPagination();
     renderTags(getFilters()); // Tags initiaux
 });
+</script>
+
+{{-- ── Leaflet JS & Carte Interactive (Option C) ── --}}
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN2GqaI=" crossorigin=""></script>
+<script>
+(function () {
+    // Données géographiques depuis PHP
+    const ateliersGeo = @json($ateliersGeo);
+
+    if (!ateliersGeo || ateliersGeo.length === 0) return;
+
+    let map         = null;
+    let markers     = [];
+    let mapInited   = false;
+    const mapSection = document.getElementById('map-section');
+    const toggleBtn  = document.getElementById('btn-toggle-map');
+    const toggleLabel = document.getElementById('map-toggle-label');
+
+    // Icône personnalisée verte
+    const greenIcon = L.divIcon({
+        className: '',
+        html: `<div style="
+            width:32px; height:32px;
+            background:linear-gradient(135deg,#0f7038,#28c76f);
+            border-radius:50% 50% 50% 0;
+            transform:rotate(-45deg);
+            border:3px solid #fff;
+            box-shadow:0 2px 8px rgba(15,112,56,.5);
+        "></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -34],
+    });
+
+    const userIcon = L.divIcon({
+        className: '',
+        html: `<div style="
+            width:28px; height:28px;
+            background:linear-gradient(135deg,#1e88e5,#42a5f5);
+            border-radius:50%;
+            border:3px solid #fff;
+            box-shadow:0 2px 8px rgba(30,136,229,.6);
+        "></div>`,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+    });
+
+    // Construire le HTML du popup
+    function buildPopup(a) {
+        const stars = Array.from({length: 5}, (_, i) =>
+            `<i>${i < Math.round(a.moyenne_note) ? '★' : '☆'}</i>`
+        ).join('');
+
+        return `<div class="map-popup">
+            <div class="map-popup-title">${a.nom}</div>
+            <div class="map-popup-ville"><i>📍</i> ${a.ville} · ${a.adresse}</div>
+            <div class="map-popup-stars">${stars}
+                <span style="color:#6c757d;font-size:.75rem;margin-left:4px;">
+                    ${a.moyenne_note > 0 ? a.moyenne_note + '/5' : 'Nouveau'}
+                    ${a.nombre_avis > 0 ? '(' + a.nombre_avis + ' avis)' : ''}
+                </span>
+            </div>
+            <div class="map-popup-services">🧵 ${a.services_count} service(s) disponible(s)</div>
+            <a href="${a.url}" class="btn-popup">Voir cet atelier →</a>
+        </div>`;
+    }
+
+    // Placer / rafraîchir les marqueurs
+    function updateMapMarkers(data) {
+        // Supprimer anciens marqueurs
+        markers.forEach(m => map.removeLayer(m));
+        markers = [];
+
+        if (!data || data.length === 0) return;
+
+        const bounds = [];
+        data.forEach(a => {
+            if (!a.latitude || !a.longitude) return;
+            const m = L.marker([a.latitude, a.longitude], { icon: greenIcon })
+                .bindPopup(buildPopup(a), { maxWidth: 260 })
+                .addTo(map);
+            markers.push(m);
+            bounds.push([a.latitude, a.longitude]);
+        });
+
+        if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
+        }
+
+        // Mettre à jour le compteur
+        const counter = document.getElementById('map-marker-count');
+        if (counter) counter.textContent = data.length;
+    }
+
+    // Exposer globalement pour le AJAX filter sync
+    window.leafletMap    = null;
+    window.updateMapMarkers = updateMapMarkers;
+
+    // Initialiser la carte (une seule fois, au premier affichage)
+    function initMap() {
+        if (mapInited) return;
+        mapInited = true;
+
+        map = L.map('leaflet-map', {
+            center: [36.8065, 10.1815],
+            zoom: 7,
+            zoomControl: true,
+        });
+
+        window.leafletMap = map;
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            maxZoom: 18,
+        }).addTo(map);
+
+        updateMapMarkers(ateliersGeo);
+    }
+
+    // Toggle affichage carte
+    toggleBtn.addEventListener('click', function () {
+        const visible = mapSection.style.display !== 'none';
+        if (visible) {
+            mapSection.style.display = 'none';
+            toggleLabel.textContent = 'Carte';
+            toggleBtn.style.color = '#0f7038';
+        } else {
+            mapSection.style.display = 'block';
+            toggleLabel.textContent = 'Masquer';
+            toggleBtn.style.color = '#dc3545';
+            // Initialiser la carte si pas encore fait
+            initMap();
+            // Invalider la taille Leaflet (car la div était cachée)
+            setTimeout(() => map && map.invalidateSize(), 100);
+        }
+    });
+
+    // Géolocalisation : "Me géolocaliser"
+    let userMarker = null;
+    document.getElementById('btn-locate').addEventListener('click', function () {
+        if (!map) {
+            // Ouvrir la carte d'abord
+            mapSection.style.display = 'block';
+            toggleLabel.textContent = 'Masquer';
+            initMap();
+            setTimeout(() => {
+                map.invalidateSize();
+                geolocate();
+            }, 200);
+            return;
+        }
+        geolocate();
+    });
+
+    function geolocate() {
+        const btn = document.getElementById('btn-locate');
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Localisation…';
+        btn.disabled = true;
+
+        if (!navigator.geolocation) {
+            alert('La géolocalisation n\'est pas supportée par votre navigateur.');
+            btn.innerHTML = '<i class="bi bi-crosshair2"></i> Me géolocaliser';
+            btn.disabled = false;
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            function (pos) {
+                const lat = pos.coords.latitude;
+                const lng = pos.coords.longitude;
+
+                // Retirer l'ancien marqueur utilisateur
+                if (userMarker) map.removeLayer(userMarker);
+
+                userMarker = L.marker([lat, lng], { icon: userIcon })
+                    .addTo(map)
+                    .bindPopup('<div style="padding:8px;font-weight:600;color:#1e88e5;">📍 Vous êtes ici</div>')
+                    .openPopup();
+
+                // Calculer l'atelier le plus proche
+                let nearest = null;
+                let minDist = Infinity;
+                ateliersGeo.forEach(a => {
+                    if (!a.latitude) return;
+                    const d = Math.sqrt(Math.pow(a.latitude - lat, 2) + Math.pow(a.longitude - lng, 2));
+                    if (d < minDist) { minDist = d; nearest = a; }
+                });
+
+                if (nearest) {
+                    // Centrer entre l'utilisateur et l'atelier le plus proche
+                    map.fitBounds([[lat, lng], [nearest.latitude, nearest.longitude]], { padding: [60, 60], maxZoom: 13 });
+                    // Ouvrir le popup de l'atelier le plus proche
+                    const nearestMarker = markers.find(m => {
+                        const ll = m.getLatLng();
+                        return Math.abs(ll.lat - nearest.latitude) < 0.0001 && Math.abs(ll.lng - nearest.longitude) < 0.0001;
+                    });
+                    if (nearestMarker) {
+                        setTimeout(() => nearestMarker.openPopup(), 600);
+                    }
+                } else {
+                    map.setView([lat, lng], 12);
+                }
+
+                btn.innerHTML = '✅ Géolocalisé !';
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="bi bi-crosshair2"></i> Me géolocaliser';
+                    btn.disabled = false;
+                }, 3000);
+            },
+            function () {
+                alert('Impossible d\'accéder à votre position. Veuillez autoriser la géolocalisation.');
+                btn.innerHTML = '<i class="bi bi-crosshair2"></i> Me géolocaliser';
+                btn.disabled = false;
+            },
+            { timeout: 10000, maximumAge: 60000 }
+        );
+    }
+})();
 </script>
 @endpush
