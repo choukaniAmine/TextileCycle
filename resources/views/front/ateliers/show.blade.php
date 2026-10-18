@@ -16,13 +16,21 @@
         background:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none'%3E%3Cg fill='%23ffffff' fill-opacity='0.06'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
     }
 
+    html {
+        scroll-behavior: smooth;
+    }
+
     /* ── Card contenu ── */
     .content-card {
         background:#fff;
         border-radius:20px;
         box-shadow:0 4px 24px rgba(0,0,0,.08);
         border:none;
-        margin-top:-40px;
+        position:relative;
+        margin-bottom:28px;
+    }
+    .hero-overlap-card {
+        margin-top:-50px;
         position:relative;
         z-index:10;
     }
@@ -33,7 +41,7 @@
         border-radius:14px;
         padding:20px;
         background:#fff;
-        transition:border-color .2s, box-shadow .2s, transform .2s;
+        transition:border-color .2s, box-shadow .2s;
         position:relative;
         overflow:hidden;
     }
@@ -47,7 +55,6 @@
     .service-item:hover {
         border-color:#0f7038;
         box-shadow:0 4px 16px rgba(15,112,56,.12);
-        transform:translateX(4px);
     }
     .service-type-badge {
         background:#e8f5e9; color:#0f7038;
@@ -64,13 +71,17 @@
     }
 
     /* ── Info sidebar ── */
+    .sidebar-sticky {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 90px;
+        z-index: 10;
+    }
     .info-card {
         background:#fff;
         border-radius:16px;
         box-shadow:0 4px 20px rgba(0,0,0,.07);
         border:none;
-        position:sticky;
-        top:20px;
     }
     .info-item {
         display:flex; align-items:flex-start; gap:14px;
@@ -232,7 +243,7 @@
             <div class="col-lg-8">
 
                 {{-- Description --}}
-                <div class="content-card p-4 p-md-5 mb-4">
+                <div class="content-card hero-overlap-card p-4 p-md-5 mb-4">
                     <h5 class="fw-bold mb-3">
                         <i class="bi bi-info-circle text-success me-2"></i> À propos
                     </h5>
@@ -242,7 +253,7 @@
                 </div>
 
                 {{-- Services --}}
-                <div class="content-card p-4 p-md-5 mb-4" style="margin-top:0;">
+                <div class="content-card p-4 p-md-5 mb-4">
                     <h5 class="fw-bold mb-4">
                         <i class="bi bi-stars text-warning me-2"></i>
                         Services & Tarifs
@@ -294,7 +305,7 @@
                 </div>
 
                 {{-- 🧮 SECTION SIMULATEUR DE DEVIS & IMPACT ÉCOLOGIQUE (FONCTIONNALITÉ AVANCÉE) ── --}}
-                <div class="content-card p-4 p-md-5 mb-4 devis-simulator-box" id="simulateur-devis" style="margin-top:0;">
+                <div class="content-card p-4 p-md-5 mb-4 devis-simulator-box" id="simulateur-devis">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
                         <div>
                             <h5 class="fw-bold mb-1 text-success">
@@ -474,7 +485,7 @@
                 </div>
 
                 {{-- ⭐ SECTION AVIS CLIENTS (VALEUR AJOUTÉE) ── --}}
-                <div class="content-card p-4 p-md-5 mb-4" style="margin-top:0;">
+                <div class="content-card p-4 p-md-5 mb-4">
                     <h5 class="fw-bold mb-4">
                         <i class="bi bi-chat-square-text text-warning me-2"></i>
                         Avis clients
@@ -638,84 +649,86 @@
 
             {{-- ── Sidebar ── --}}
             <div class="col-lg-4">
-                <div class="info-card p-4 mb-4">
-                    <h6 class="fw-bold mb-3 text-dark border-bottom pb-2">
-                        <i class="bi bi-card-list text-success me-2"></i> Coordonnées
-                    </h6>
+                <div class="sidebar-sticky">
+                    <div class="info-card hero-overlap-card p-4 mb-4">
+                        <h6 class="fw-bold mb-3 text-dark border-bottom pb-2">
+                            <i class="bi bi-card-list text-success me-2"></i> Coordonnées
+                        </h6>
 
-                    <div class="info-item">
-                        <div class="info-icon" style="background:#e8f5e9;">
-                            <i class="bi bi-geo-alt text-success"></i>
+                        <div class="info-item">
+                            <div class="info-icon" style="background:#e8f5e9;">
+                                <i class="bi bi-geo-alt text-success"></i>
+                            </div>
+                            <div>
+                                <div class="small text-muted">Adresse</div>
+                                <div class="fw-medium small">{{ $atelier->adresse }}</div>
+                                <div class="text-muted" style="font-size:.75rem;">{{ $atelier->code_postal ?? '' }} {{ $atelier->ville }}</div>
+                            </div>
                         </div>
-                        <div>
-                            <div class="small text-muted">Adresse</div>
-                            <div class="fw-medium small">{{ $atelier->adresse }}</div>
-                            <div class="text-muted" style="font-size:.75rem;">{{ $atelier->code_postal ?? '' }} {{ $atelier->ville }}</div>
+
+                        <div class="info-item">
+                            <div class="info-icon" style="background:#fff3e0;">
+                                <i class="bi bi-telephone text-warning"></i>
+                            </div>
+                            <div>
+                                <div class="small text-muted">Téléphone</div>
+                                <a href="tel:{{ $atelier->telephone }}" class="fw-bold small text-dark text-decoration-none">
+                                    {{ $atelier->telephone }}
+                                </a>
+                            </div>
                         </div>
+
+                        @if($atelier->email)
+                        <div class="info-item">
+                            <div class="info-icon" style="background:#e3f2fd;">
+                                <i class="bi bi-envelope text-primary"></i>
+                            </div>
+                            <div>
+                                <div class="small text-muted">Email</div>
+                                <a href="mailto:{{ $atelier->email }}" class="small text-dark text-decoration-none">
+                                    {{ $atelier->email }}
+                                </a>
+                            </div>
+                        </div>
+                        @endif
+
+                        <div class="info-item">
+                            <div class="info-icon" style="background:#fce4ec;">
+                                <i class="bi bi-clock text-danger"></i>
+                            </div>
+                            <div>
+                                <div class="small text-muted">Horaires</div>
+                                <div class="small text-dark">{{ $atelier->horaires ?? 'Non renseigné' }}</div>
+                            </div>
+                        </div>
+
+                        <a href="#simulateur-devis"
+                           class="btn btn-outline-success w-100 rounded-pill py-2 mt-2 fw-semibold">
+                            <i class="bi bi-calculator me-2"></i> Simuler un devis PDF
+                        </a>
+                        <a href="tel:{{ $atelier->telephone }}"
+                           class="btn w-100 rounded-pill py-2 fw-semibold mt-2"
+                           style="background:linear-gradient(135deg,#0f7038,#28c76f); color:#fff; border:none;">
+                            <i class="bi bi-telephone-fill me-2"></i> Contacter l'atelier
+                        </a>
+                        <a href="{{ route('ateliers.index') }}"
+                           class="btn btn-outline-secondary w-100 rounded-pill py-2 mt-2 fw-semibold">
+                            <i class="bi bi-arrow-left me-2"></i> Retour aux ateliers
+                        </a>
                     </div>
 
-                    <div class="info-item">
-                        <div class="info-icon" style="background:#fff3e0;">
-                            <i class="bi bi-telephone text-warning"></i>
-                        </div>
-                        <div>
-                            <div class="small text-muted">Téléphone</div>
-                            <a href="tel:{{ $atelier->telephone }}" class="fw-bold small text-dark text-decoration-none">
-                                {{ $atelier->telephone }}
-                            </a>
-                        </div>
+                    {{-- CTA Banner --}}
+                    <div class="cta-banner">
+                        <i class="bi bi-recycle fs-2 mb-2 d-block"></i>
+                        <h6 class="fw-bold mb-1">Agissons ensemble</h6>
+                        <p class="small mb-3" style="opacity:.85;">
+                            Chaque vêtement réparé, c'est de l'eau économisée et du CO₂ évité.
+                        </p>
+                        <a href="{{ route('ateliers.index') }}"
+                           class="btn btn-sm btn-light rounded-pill px-4 fw-semibold text-success">
+                            Voir tous les ateliers
+                        </a>
                     </div>
-
-                    @if($atelier->email)
-                    <div class="info-item">
-                        <div class="info-icon" style="background:#e3f2fd;">
-                            <i class="bi bi-envelope text-primary"></i>
-                        </div>
-                        <div>
-                            <div class="small text-muted">Email</div>
-                            <a href="mailto:{{ $atelier->email }}" class="small text-dark text-decoration-none">
-                                {{ $atelier->email }}
-                            </a>
-                        </div>
-                    </div>
-                    @endif
-
-                    <div class="info-item">
-                        <div class="info-icon" style="background:#fce4ec;">
-                            <i class="bi bi-clock text-danger"></i>
-                        </div>
-                        <div>
-                            <div class="small text-muted">Horaires</div>
-                            <div class="small text-dark">{{ $atelier->horaires ?? 'Non renseigné' }}</div>
-                        </div>
-                    </div>
-
-                    <a href="#simulateur-devis"
-                       class="btn btn-outline-success w-100 rounded-pill py-2 mt-2 fw-semibold">
-                        <i class="bi bi-calculator me-2"></i> Simuler un devis PDF
-                    </a>
-                    <a href="tel:{{ $atelier->telephone }}"
-                       class="btn w-100 rounded-pill py-2 fw-semibold mt-2"
-                       style="background:linear-gradient(135deg,#0f7038,#28c76f); color:#fff; border:none;">
-                        <i class="bi bi-telephone-fill me-2"></i> Contacter l'atelier
-                    </a>
-                    <a href="{{ route('ateliers.index') }}"
-                       class="btn btn-outline-secondary w-100 rounded-pill py-2 mt-2 fw-semibold">
-                        <i class="bi bi-arrow-left me-2"></i> Retour aux ateliers
-                    </a>
-                </div>
-
-                {{-- CTA Banner --}}
-                <div class="cta-banner">
-                    <i class="bi bi-recycle fs-2 mb-2 d-block"></i>
-                    <h6 class="fw-bold mb-1">Agissons ensemble</h6>
-                    <p class="small mb-3" style="opacity:.85;">
-                        Chaque vêtement réparé, c'est de l'eau économisée et du CO₂ évité.
-                    </p>
-                    <a href="{{ route('ateliers.index') }}"
-                       class="btn btn-sm btn-light rounded-pill px-4 fw-semibold text-success">
-                        Voir tous les ateliers
-                    </a>
                 </div>
             </div>
 
