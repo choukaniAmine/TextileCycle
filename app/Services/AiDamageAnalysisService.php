@@ -75,9 +75,35 @@ class AiDamageAnalysisService
     }
 
     /**
-     * Appel à l'API Google Gemini Vision.
+     * Appel à l'API Google Gemini Vision avec cascade de modèles en cas de 503 haute demande.
      */
-    protected function callGeminiVision(string $apiKey, string $model, array $imageData): ?array
+    protected function callGeminiVision(string $apiKey, string $primaryModel, array $imageData): ?array
+    {
+        $modelsToTry = array_unique([
+            $primaryModel,
+            'gemini-flash-latest',
+            'gemini-3.5-flash',
+            'gemini-3.8-flash-lite-tts',
+        ]);
+
+        foreach ($modelsToTry as $index => $model) {
+            $result = $this->executeGeminiCall($apiKey, $model, $imageData);
+            if ($result !== null) {
+                return $result;
+            }
+            // Petit délai si on bascule sur le modèle suivant après un 503
+            if ($index < count($modelsToTry) - 1) {
+                usleep(500000); // 500ms
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Exécute un appel unique vers un modèle Gemini donné.
+     */
+    protected function executeGeminiCall(string $apiKey, string $model, array $imageData): ?array
     {
         $prompt = <<<PROMPT
 Tu es un expert vérificateur et maître tailleur en confection textile, retouche et économie circulaire de vêtements.
@@ -152,17 +178,18 @@ PROMPT;
                     $decoded = json_decode(trim($cleaned), true);
                     if (is_array($decoded)) {
                         $decoded['source'] = 'gemini_ai';
+                        $decoded['model_used'] = $model;
                         return $decoded;
                     }
                 }
             } else {
-                Log::warning('Gemini API response failed', [
+                Log::warning("Gemini API ({$model}) response failed", [
                     'status' => $response->status(),
                     'error' => $response->body()
                 ]);
             }
         } catch (\Throwable $e) {
-            Log::error('Gemini API Exception: ' . $e->getMessage());
+            Log::error("Gemini API ({$model}) Exception: " . $e->getMessage());
         }
 
         return null;
