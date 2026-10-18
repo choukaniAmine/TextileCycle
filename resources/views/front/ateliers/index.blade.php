@@ -3,7 +3,7 @@
 @section('title', 'Ateliers & Services de Réparation')
 
 @push('styles')
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <style>
     /* ── Hero ── */
     .hero-ateliers {
@@ -542,7 +542,7 @@ document.addEventListener('DOMContentLoaded', function () {
 </script>
 
 {{-- ── Leaflet JS (chargé avant le script carte) ── --}}
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN2GqaI=" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 @endpush
 
 @push('scripts')
