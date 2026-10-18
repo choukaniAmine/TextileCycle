@@ -21,12 +21,16 @@ class AiDamageAnalysisService
 
         // 2. Tenter l'appel à l'API Gemini
         $apiKey = config('services.gemini.api_key');
-        $model = config('services.gemini.model', 'gemini-1.5-flash');
+        $model = config('services.gemini.model', 'gemini-2.5-flash');
 
         $aiResult = null;
 
         if (!empty($apiKey)) {
             $aiResult = $this->callGeminiVision($apiKey, $model, $imageData);
+            if (!$aiResult) {
+                // Si la clé est configurée mais que l'API a retourné une erreur (ex: quota ou format)
+                throw new \RuntimeException("L'analyseur d'image IA n'a pas pu traiter l'image. Veuillez vérifier la connexion ou réessayer avec une photo plus nette.");
+            }
         }
 
         // Si l'API retourne un résultat valide
@@ -43,7 +47,7 @@ class AiDamageAnalysisService
             return $aiResult;
         }
 
-        // 3. Fallback uniquement en cas de panne réseau ou de mock explicite en test
+        // 3. Fallback uniquement en environnement de test sans clé API
         $aiResult = $this->getMockAnalysis($image);
         $aiResult['matching_services'] = $this->findMatchingServices($aiResult['suggested_service_keywords'] ?? []);
         $aiResult['matching_ateliers'] = $this->findMatchingAteliers($aiResult['matching_services']);

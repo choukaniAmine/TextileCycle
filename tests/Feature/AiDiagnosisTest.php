@@ -56,6 +56,34 @@ class AiDiagnosisTest extends TestCase
 
     public function test_ai_diagnosis_returns_successful_analysis(): void
     {
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'candidates' => [
+                    [
+                        'content' => [
+                            'parts' => [
+                                [
+                                    'text' => json_encode([
+                                        'is_valid_garment_damage' => true,
+                                        'garment_type' => 'Jean denim',
+                                        'material_detected' => 'Coton denim',
+                                        'damage_type' => 'Déchirure genou',
+                                        'damage_description' => 'Accroc visible suite à usure.',
+                                        'severity' => 'Moyenne',
+                                        'repairability_score' => 9,
+                                        'repair_advice' => 'Pose de renfort intérieur.',
+                                        'suggested_repair' => 'Reprise couture',
+                                        'suggested_service_keywords' => ['couture', 'retouche'],
+                                        'eco_impact_benefit' => 'Économie de 8 kg CO2.',
+                                    ])
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ], 200)
+        ]);
+
         // 1x1 transparent/dummy jpeg bytes
         $content = base64_decode('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=');
         $file = UploadedFile::fake()->createWithContent('jean_abime.jpg', $content);
