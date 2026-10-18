@@ -238,6 +238,44 @@
         align-items: center;
         gap: 5px;
     }
+
+    /* ── Diagnostic IA ── */
+    .ai-diag-banner {
+        background: linear-gradient(135deg, #f0fdf4 0%, #e6f7ec 100%);
+        border: 2px dashed #86efac;
+        border-radius: 20px;
+        padding: 24px;
+        transition: border-color .3s, transform .2s;
+    }
+    .ai-diag-banner:hover {
+        border-color: #22c55e;
+    }
+    .ai-dropzone {
+        background: #fff;
+        border: 2px dashed #cbd5e1;
+        border-radius: 16px;
+        padding: 28px 20px;
+        text-align: center;
+        cursor: pointer;
+        transition: all .2s ease;
+    }
+    .ai-dropzone:hover, .ai-dropzone.dragover {
+        border-color: #10b981;
+        background: #f8fafc;
+        transform: scale(1.01);
+    }
+    .ai-badge-score {
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(16,185,129,.4);
+    }
 </style>
 @endpush
 
@@ -328,14 +366,18 @@
         </div>
 
         {{-- ── Résultats header ── --}}
-        <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
             <h5 class="fw-bold mb-0 text-dark">
                 Ateliers disponibles
                 <span class="badge rounded-pill ms-1 px-3 py-1"
                       id="result-count"
                       style="background:#0f7038; font-size:.8rem;">{{ $ateliers->total() }}</span>
             </h5>
-            <div class="d-flex gap-2 align-items-center">
+            <div class="d-flex gap-2 align-items-center flex-wrap">
+                <button class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold shadow-sm" id="btn-toggle-ai" style="background:#fff; border-color:#86efac;">
+                    <i class="bi bi-stars text-success me-1"></i>
+                    <span id="ai-toggle-label">Diagnostic IA par Photo</span>
+                </button>
                 <button class="map-toggle-btn" id="btn-toggle-map" title="Afficher / Masquer la carte">
                     <i class="bi bi-map-fill text-success"></i>
                     <span id="map-toggle-label">Carte</span>
@@ -346,6 +388,100 @@
                 <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="view-list" title="Liste">
                     <i class="bi bi-list-ul"></i>
                 </button>
+            </div>
+        </div>
+
+        {{-- ── Section Diagnostic IA ReFashion (Option IA Vision) ── --}}
+        <div id="ai-section" class="mb-4" style="display:none;">
+            <div class="ai-diag-banner shadow-sm">
+                <div class="row g-4 align-items-center">
+                    <div class="col-lg-5">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge rounded-pill px-3 py-1 fw-bold text-white" style="background:linear-gradient(135deg,#0f7038,#28c76f);font-size:.75rem;">
+                                <i class="bi bi-stars me-1"></i> IA Vision Multimodale
+                            </span>
+                            <small class="text-muted">Propulsé par Google Gemini</small>
+                        </div>
+                        <h4 class="fw-bold text-dark mb-2">Diagnostic Intelligent de Vêtement Abîmé</h4>
+                        <p class="text-muted small mb-3">
+                            Téléversez la photo d'un accroc, d'un trou ou d'une fermeture cassée. Notre IA détecte la matière, estime la réparabilité et vous oriente vers les meilleurs ateliers.
+                        </p>
+
+                        {{-- Zone de téléversement --}}
+                        <div class="ai-dropzone mb-2" id="aiDropzone">
+                            <input type="file" id="aiFileInput" accept="image/jpeg,image/png,image/jpg,image/webp" class="d-none">
+                            <div id="aiDropzonePrompt">
+                                <i class="bi bi-cloud-arrow-up fs-1 text-success mb-2 d-block"></i>
+                                <span class="fw-bold text-dark d-block mb-1">Glissez votre photo ici ou cliquez</span>
+                                <span class="text-muted small">JPG, PNG, WEBP (Max 10 Mo)</span>
+                            </div>
+                            <div id="aiImagePreviewWrap" class="d-none position-relative">
+                                <img id="aiImagePreview" src="" alt="Aperçu vêtement" style="max-height: 180px; width: 100%; object-fit: contain; border-radius: 12px;">
+                                <button type="button" id="aiBtnChangePhoto" class="btn btn-sm btn-dark rounded-pill px-3 position-absolute bottom-0 start-50 translate-middle-x mb-2 shadow">
+                                    <i class="bi bi-arrow-repeat me-1"></i> Changer la photo
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="button" id="btnLaunchAiDiagnosis" class="btn btn-success w-100 py-2 rounded-pill fw-bold shadow-sm" style="background:linear-gradient(135deg,#0f7038,#28c76f);border:none;" disabled>
+                            <i class="bi bi-cpu me-2"></i> Lancer l'analyse IA
+                        </button>
+                    </div>
+
+                    {{-- Résultat IA --}}
+                    <div class="col-lg-7">
+                        {{-- État initial d'attente --}}
+                        <div id="aiWaitingState" class="text-center p-4 bg-white rounded-4 shadow-sm border border-light">
+                            <i class="bi bi-shield-check fs-1 text-success opacity-50 mb-2 d-block"></i>
+                            <h6 class="fw-bold text-dark mb-1">En attente d'une photo</h6>
+                            <p class="text-muted small mb-0">Sélectionnez une photo nette de la zone abîmée pour obtenir un diagnostic complet instantané.</p>
+                        </div>
+
+                        {{-- Spinner de chargement IA --}}
+                        <div id="aiLoadingState" class="text-center p-5 bg-white rounded-4 shadow-sm border border-light d-none">
+                            <div class="spinner-border text-success mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+                            <h6 class="fw-bold text-dark mb-1">Analyse IA en cours...</h6>
+                            <p class="text-muted small mb-0">L'IA examine les fibres, le type d'usure et calcule l'indice de réparabilité.</p>
+                        </div>
+
+                        {{-- Panneau Résultat IA --}}
+                        <div id="aiResultCard" class="bg-white rounded-4 p-4 shadow-sm border border-light d-none">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-1 fw-bold small mb-2 d-inline-block">
+                                        ✅ Diagnostic terminé
+                                    </span>
+                                    <h5 class="fw-bold text-dark mb-0" id="aiGarmentType">Jean en denim</h5>
+                                    <small class="text-muted" id="aiMaterialDetected">Matière : Coton épais</small>
+                                </div>
+                                <div class="text-center">
+                                    <div class="ai-badge-score" id="aiScoreBadge" style="background: linear-gradient(135deg, #10b981, #059669);">9</div>
+                                    <small class="d-block text-muted fw-bold mt-1" style="font-size: .7rem;">Réparabilité /10</small>
+                                </div>
+                            </div>
+
+                            <div class="p-3 rounded-3 mb-3" style="background: #f8fafc; border-left: 4px solid #10b981;">
+                                <div class="fw-bold text-dark small mb-1" id="aiDamageType">Déchirure sur couture</div>
+                                <p class="text-muted small mb-0" id="aiDamageDesc"></p>
+                            </div>
+
+                            <div class="mb-3">
+                                <strong class="small text-dark d-block mb-1"><i class="bi bi-lightbulb text-warning me-1"></i> Conseil de réparation :</strong>
+                                <p class="small text-secondary mb-0" id="aiAdvice"></p>
+                            </div>
+
+                            <div class="d-flex align-items-center gap-2 p-2 rounded-3 mb-3" style="background:#e8f5e9; color:#0f7038; font-size:.82rem;">
+                                <i class="bi bi-recycle fs-5 flex-shrink-0"></i>
+                                <span id="aiEcoImpact">Impact écologique préservé</span>
+                            </div>
+
+                            <div class="border-top pt-3">
+                                <div class="fw-bold small text-dark mb-2">🧵 Prestations recommandées en atelier :</div>
+                                <div class="d-flex flex-wrap gap-2" id="aiMatchingServicesList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -538,6 +674,178 @@ document.addEventListener('DOMContentLoaded', function () {
 
     bindPagination();
     renderTags(getFilters()); // Tags initiaux
+
+    /* ─── Diagnostic IA par Photo (Google Gemini) ─── */
+    const aiSection       = document.getElementById('ai-section');
+    const btnToggleAi     = document.getElementById('btn-toggle-ai');
+    const aiToggleLabel   = document.getElementById('ai-toggle-label');
+    const aiDropzone      = document.getElementById('aiDropzone');
+    const aiFileInput     = document.getElementById('aiFileInput');
+    const aiPrompt        = document.getElementById('aiDropzonePrompt');
+    const aiPreviewWrap   = document.getElementById('aiImagePreviewWrap');
+    const aiPreview       = document.getElementById('aiImagePreview');
+    const aiBtnChange     = document.getElementById('aiBtnChangePhoto');
+    const btnLaunchAi     = document.getElementById('btnLaunchAiDiagnosis');
+
+    const aiWaitingState  = document.getElementById('aiWaitingState');
+    const aiLoadingState  = document.getElementById('aiLoadingState');
+    const aiResultCard    = document.getElementById('aiResultCard');
+
+    let selectedAiFile    = null;
+
+    if (btnToggleAi && aiSection) {
+        btnToggleAi.addEventListener('click', function () {
+            const isVisible = aiSection.style.display !== 'none';
+            if (isVisible) {
+                aiSection.style.display = 'none';
+                aiToggleLabel.textContent = 'Diagnostic IA par Photo';
+                btnToggleAi.classList.remove('btn-success', 'text-white');
+                btnToggleAi.classList.add('btn-outline-success');
+            } else {
+                aiSection.style.display = 'block';
+                aiToggleLabel.textContent = 'Masquer le Diagnostic IA';
+                btnToggleAi.classList.remove('btn-outline-success');
+                btnToggleAi.classList.add('btn-success', 'text-white');
+                aiSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
+
+    if (aiDropzone && aiFileInput) {
+        aiDropzone.addEventListener('click', (e) => {
+            if (e.target !== aiBtnChange && !aiBtnChange.contains(e.target)) {
+                aiFileInput.click();
+            }
+        });
+
+        aiBtnChange.addEventListener('click', (e) => {
+            e.stopPropagation();
+            aiFileInput.click();
+        });
+
+        aiDropzone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            aiDropzone.classList.add('dragover');
+        });
+
+        aiDropzone.addEventListener('dragleave', () => {
+            aiDropzone.classList.remove('dragover');
+        });
+
+        aiDropzone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            aiDropzone.classList.remove('dragover');
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleFileSelect(e.dataTransfer.files[0]);
+            }
+        });
+
+        aiFileInput.addEventListener('change', () => {
+            if (aiFileInput.files && aiFileInput.files[0]) {
+                handleFileSelect(aiFileInput.files[0]);
+            }
+        });
+    }
+
+    function handleFileSelect(file) {
+        if (!file.type.match('image.*')) {
+            alert('Veuillez sélectionner un fichier image valide (JPG, PNG, WEBP).');
+            return;
+        }
+        selectedAiFile = file;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            aiPreview.src = e.target.result;
+            aiPrompt.classList.add('d-none');
+            aiPreviewWrap.classList.remove('d-none');
+            btnLaunchAi.disabled = false;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    if (btnLaunchAi) {
+        btnLaunchAi.addEventListener('click', async function () {
+            if (!selectedAiFile) return;
+
+            btnLaunchAi.disabled = true;
+            btnLaunchAi.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Analyse IA en cours...';
+
+            aiWaitingState.classList.add('d-none');
+            aiResultCard.classList.add('d-none');
+            aiLoadingState.classList.remove('d-none');
+
+            const formData = new FormData();
+            formData.append('photo', selectedAiFile);
+
+            try {
+                const response = await fetch("{{ route('ateliers.ai.diagnose') }}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                });
+
+                const json = await response.json();
+
+                if (json.success && json.data) {
+                    renderAiResult(json.data);
+                } else {
+                    alert(json.message || 'Une erreur est survenue lors de l\'analyse IA.');
+                    aiWaitingState.classList.remove('d-none');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Erreur lors de la communication avec le serveur IA.');
+                aiWaitingState.classList.remove('d-none');
+            } finally {
+                aiLoadingState.classList.add('d-none');
+                btnLaunchAi.disabled = false;
+                btnLaunchAi.innerHTML = '<i class="bi bi-cpu me-2"></i> Lancer l\'analyse IA';
+            }
+        });
+    }
+
+    function renderAiResult(data) {
+        document.getElementById('aiGarmentType').textContent = data.garment_type || 'Vêtement analysé';
+        document.getElementById('aiMaterialDetected').textContent = 'Matière détectée : ' + (data.material_detected || 'Textile standard');
+        document.getElementById('aiDamageType').textContent = (data.damage_type || 'Dégât détecté') + (data.severity ? ' (' + data.severity + ')' : '');
+        document.getElementById('aiDamageDesc').textContent = data.damage_description || '';
+        document.getElementById('aiAdvice').textContent = data.repair_advice || data.suggested_repair || '';
+        document.getElementById('aiEcoImpact').textContent = data.eco_impact_benefit || 'Économie de ressources textiles';
+
+        const score = data.repairability_score || 8;
+        const scoreBadge = document.getElementById('aiScoreBadge');
+        scoreBadge.textContent = score;
+
+        if (score >= 8) {
+            scoreBadge.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+        } else if (score >= 5) {
+            scoreBadge.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+        } else {
+            scoreBadge.style.background = 'linear-gradient(135deg, #ef4444, #b91c1c)';
+        }
+
+        const servicesWrap = document.getElementById('aiMatchingServicesList');
+        servicesWrap.innerHTML = '';
+
+        if (data.matching_services && data.matching_services.length > 0) {
+            data.matching_services.forEach(s => {
+                const badge = document.createElement('a');
+                badge.href = s.atelier_url;
+                badge.className = 'btn btn-sm btn-outline-success rounded-pill px-3 py-1 text-decoration-none';
+                badge.style.fontSize = '.8rem';
+                badge.innerHTML = `<strong>${s.nom}</strong> · ${s.tarif_estime} DT <small class="text-muted">(${s.atelier_nom} - ${s.atelier_ville})</small> &rarr;`;
+                servicesWrap.appendChild(badge);
+            });
+        } else {
+            servicesWrap.innerHTML = '<span class="text-muted small">Consultez nos ateliers pour un avis sur mesure.</span>';
+        }
+
+        aiResultCard.classList.remove('d-none');
+    }
 });
 </script>
 

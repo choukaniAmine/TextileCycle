@@ -22,6 +22,7 @@ Route::get('/vetements/{vetement}', [FrontVetementController::class, 'show'])->n
 
 // Module 2 — Ateliers, Services & Devis
 Route::get('/ateliers', [Front\AtelierController::class, 'index'])->name('ateliers.index');
+Route::post('/ateliers/diagnostic-ia', [Front\AiDiagnosisController::class, 'analyze'])->name('ateliers.ai.diagnose');
 Route::get('/ateliers/{atelier}', [Front\AtelierController::class, 'show'])->name('ateliers.show');
 Route::post('/ateliers/{atelier}/devis', [Front\DevisController::class, 'store'])->name('ateliers.devis.store');
 Route::get('/devis/{devis}/telecharger', [Front\DevisController::class, 'download'])->name('devis.download');
