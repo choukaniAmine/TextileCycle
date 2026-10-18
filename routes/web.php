@@ -20,9 +20,12 @@ Route::get('/', [Front\HomeController::class, 'index'])->name('home');
 Route::get('/vetements', [FrontVetementController::class, 'index'])->name('vetements.index');
 Route::get('/vetements/{vetement}', [FrontVetementController::class, 'show'])->name('vetements.show');
 
-// Module 2 — Ateliers & Services (Public)
+// Module 2 — Ateliers, Services & Devis
 Route::get('/ateliers', [Front\AtelierController::class, 'index'])->name('ateliers.index');
 Route::get('/ateliers/{atelier}', [Front\AtelierController::class, 'show'])->name('ateliers.show');
+Route::post('/ateliers/{atelier}/devis', [Front\DevisController::class, 'store'])->name('ateliers.devis.store');
+Route::get('/devis/{devis}/telecharger', [Front\DevisController::class, 'download'])->name('devis.download');
+Route::get('/devis/{devis}/apercu', [Front\DevisController::class, 'stream'])->name('devis.stream');
 
 // Module 3 — Associations (Public)
 Route::get('/associations', [Front\AssociationController::class, 'index'])->name('associations.index');

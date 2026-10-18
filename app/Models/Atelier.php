@@ -67,4 +67,12 @@ class Atelier extends Model
     {
         return $this->avis()->count();
     }
+
+    /**
+     * Devis générés pour cet atelier.
+     */
+    public function devis(): HasMany
+    {
+        return $this->hasMany(Devis::class)->latest();
+    }
 }
