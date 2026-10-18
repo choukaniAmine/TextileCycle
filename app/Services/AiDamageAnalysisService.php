@@ -21,7 +21,7 @@ class AiDamageAnalysisService
 
         // 2. Tenter l'appel à l'API Gemini
         $apiKey = config('services.gemini.api_key');
-        $model = config('services.gemini.model', 'gemini-2.5-flash');
+        $model = config('services.gemini.model', 'gemini-3.8-flash');
 
         $aiResult = null;
 
