@@ -38,36 +38,67 @@
     .filter-card {
         background: #fff;
         border: 1px solid #e2e8f0;
-        border-radius: 16px;
-        padding: 24px;
-        box-shadow: 0 4px 24px rgba(0,0,0,.06);
+        border-radius: 18px;
+        padding: 20px 24px;
+        box-shadow: 0 10px 30px rgba(15,112,56,.06);
         margin-top: -30px;
         position: relative;
         z-index: 10;
     }
     .filter-card .form-control,
     .filter-card .form-select {
-        border-radius: 10px;
-        border: 1.5px solid #dee2e6;
-        padding: 10px 14px;
-        font-size: .9rem;
-        transition: border-color .2s, box-shadow .2s;
+        border-radius: 12px;
+        border: 1.5px solid #e2e8f0;
+        padding: 8px 14px;
+        font-size: .88rem;
+        height: 42px;
+        transition: all .2s ease;
     }
     .filter-card .form-control:focus,
     .filter-card .form-select:focus {
-        border-color: #0f7038;
-        box-shadow: 0 0 0 3px rgba(15,112,56,.12);
+        border-color: #10b981;
+        box-shadow: 0 0 0 3px rgba(16,185,129,.15);
     }
     .btn-filter {
-        background: linear-gradient(135deg,#0f7038,#28c76f);
-        border: none;
-        color: #fff;
-        border-radius: 10px;
-        padding: 10px 20px;
+        background: linear-gradient(135deg, #0f7038, #1a9e52);
+        border: 1px solid #0f7038;
+        color: #ffffff !important;
+        border-radius: 12px;
+        padding: 8px 16px;
         font-weight: 600;
-        transition: opacity .2s, transform .15s;
+        font-size: .88rem;
+        height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        box-shadow: 0 4px 12px rgba(15,112,56,.2);
+        transition: all .2s ease;
     }
-    .btn-filter:hover { opacity:.9; transform: translateY(-1px); }
+    .btn-filter:hover {
+        background: #0d5f30 !important;
+        border-color: #0d5f30 !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(15,112,56,.3);
+    }
+    .btn-reset-filter {
+        border-radius: 12px;
+        height: 42px;
+        width: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1.5px solid #e2e8f0;
+        color: #64748b;
+        background: #fff;
+        transition: all .2s ease;
+    }
+    .btn-reset-filter:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+        border-color: #cbd5e1;
+    }
 
     /* ── Tags filtres actifs ── */
     .active-filters .badge {
@@ -79,46 +110,61 @@
 
     /* ── Atelier Card ── */
     .atelier-card {
-        border: none;
-        border-radius: 16px;
+        border: 1px solid #edf2f7;
+        border-radius: 18px;
         overflow: hidden;
-        box-shadow: 0 2px 12px rgba(0,0,0,.07);
-        transition: transform .25s, box-shadow .25s;
+        box-shadow: 0 4px 18px rgba(0,0,0,.04);
+        transition: transform .25s, box-shadow .25s, border-color .25s;
         height: 100%;
+        background: #fff;
     }
     .atelier-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 12px 32px rgba(15,112,56,.18);
+        transform: translateY(-5px);
+        box-shadow: 0 14px 34px rgba(15,112,56,.12);
+        border-color: #86efac;
     }
     .atelier-card .card-img-wrap {
         position: relative;
-        height: 190px;
-        background: linear-gradient(135deg,#e8f5e9,#c8e6c9);
+        height: 180px;
+        background: linear-gradient(135deg, #e8f5e9, #dcfce7);
         overflow: hidden;
     }
     .atelier-card .card-img-wrap img {
         width:100%; height:100%; object-fit:cover;
         transition: transform .4s;
     }
-    .atelier-card:hover .card-img-wrap img { transform: scale(1.06); }
+    .atelier-card:hover .card-img-wrap img { transform: scale(1.05); }
     .atelier-card .card-img-wrap .placeholder-icon {
         position:absolute; inset:0;
         display:flex; flex-direction:column;
         align-items:center; justify-content:center;
-        color:#0f7038; opacity:.5;
+        color:#0f7038; opacity:.6;
     }
     .atelier-card .ville-badge {
         position: absolute; top:12px; right:12px;
-        background:#fff; color:#333;
-        border-radius:50px; padding:4px 10px;
-        font-size:.75rem; font-weight:600;
-        box-shadow: 0 2px 8px rgba(0,0,0,.15);
+        background:#fff; color:#1e293b;
+        border-radius:50px; padding:4px 12px;
+        font-size:.75rem; font-weight:700;
+        box-shadow: 0 2px 10px rgba(0,0,0,.12);
     }
     .atelier-card .type-badge {
         position:absolute; top:12px; left:12px;
-        background:rgba(15,112,56,.85); color:#fff;
-        border-radius:50px; padding:3px 10px;
+        background:#0f7038; color:#fff;
+        border-radius:50px; padding:4px 11px;
         font-size:.7rem; font-weight:700; letter-spacing:.3px;
+        box-shadow: 0 2px 8px rgba(15,112,56,.3);
+    }
+    .btn-card-action {
+        background: linear-gradient(135deg, #0f7038, #1a9e52);
+        color: #ffffff !important;
+        border: none;
+        transition: all .2s ease;
+    }
+    .btn-card-action:hover {
+        background: #0d5f30 !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(15,112,56,.25);
     }
 
     /* ── Stars ── */
@@ -157,13 +203,13 @@
     #map-section {
         background: #fff;
         border: 1px solid #e2e8f0;
-        border-radius: 16px;
+        border-radius: 18px;
         overflow: hidden;
         box-shadow: 0 4px 24px rgba(0,0,0,.06);
         margin-bottom: 28px;
     }
     #map-section .map-header {
-        padding: 16px 20px;
+        padding: 14px 20px;
         border-bottom: 1px solid #e8f5e9;
         display: flex;
         align-items: center;
@@ -183,8 +229,8 @@
         font-family: inherit !important;
     }
     .leaflet-popup-content-wrapper {
-        border-radius: 12px !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,.15) !important;
+        border-radius: 14px !important;
+        box-shadow: 0 6px 24px rgba(0,0,0,.15) !important;
         border: none !important;
     }
     .leaflet-popup-content { margin: 0 !important; padding: 0 !important; }
@@ -208,35 +254,69 @@
     .map-popup .map-popup-services { font-size: .78rem; color: #495057; margin-top: 4px; }
     .map-popup .btn-popup {
         display: block;
-        background: linear-gradient(135deg,#0f7038,#28c76f);
-        color: #fff !important;
+        background: linear-gradient(135deg,#0f7038,#1a9e52);
+        color: #ffffff !important;
         border-radius: 8px;
-        padding: 6px 12px;
+        padding: 7px 12px;
         text-align: center;
         text-decoration: none;
         font-size: .82rem;
         font-weight: 600;
         margin-top: 10px;
+        transition: background .2s ease;
+    }
+    .map-popup .btn-popup:hover {
+        background: #0d5f30 !important;
+        color: #ffffff !important;
     }
     #btn-locate {
-        background: linear-gradient(135deg,#0f7038,#28c76f);
-        border: none; color:#fff;
+        background: linear-gradient(135deg,#0f7038,#1a9e52);
+        border: none;
+        color:#ffffff !important;
         border-radius: 10px; padding: 8px 16px;
         font-weight: 600; font-size: .88rem;
-        cursor: pointer; transition: opacity .2s;
+        cursor: pointer; transition: all .2s;
         display: flex; align-items: center; gap: 6px;
     }
-    #btn-locate:hover { opacity: .85; }
-    .map-toggle-btn {
+    #btn-locate:hover {
+        background: #0d5f30 !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+    }
+    .action-pill-btn {
         cursor: pointer;
-        color: #0f7038;
         font-size: .85rem;
         font-weight: 600;
-        border: none;
-        background: none;
-        display: flex;
+        border-radius: 50rem;
+        padding: 6px 14px;
+        display: inline-flex;
         align-items: center;
-        gap: 5px;
+        gap: 6px;
+        transition: all .2s ease;
+        border: 1.5px solid transparent;
+        text-decoration: none;
+    }
+    .action-pill-btn.pill-outline-map {
+        background: #fff;
+        border-color: #c8e6c9;
+        color: #0f7038;
+    }
+    .action-pill-btn.pill-outline-map:hover,
+    .action-pill-btn.pill-outline-map.active {
+        background: #0f7038;
+        border-color: #0f7038;
+        color: #ffffff !important;
+    }
+    .action-pill-btn.pill-outline-ai {
+        background: #fff;
+        border-color: #86efac;
+        color: #0f7038;
+    }
+    .action-pill-btn.pill-outline-ai:hover,
+    .action-pill-btn.pill-outline-ai.active {
+        background: #0f7038;
+        border-color: #0f7038;
+        color: #ffffff !important;
     }
 
     /* ── Diagnostic IA ── */
@@ -352,11 +432,11 @@
                     </select>
                 </div>
                 <div class="col-12 col-md-2 d-flex gap-2">
-                    <button id="btn-search" class="btn btn-filter w-100">
-                        <i class="bi bi-search me-1"></i> Filtrer
+                    <button id="btn-search" class="btn btn-filter flex-grow-1">
+                        <i class="bi bi-funnel-fill"></i> Filtrer
                     </button>
-                    <button id="btn-reset" class="btn btn-outline-secondary px-3" title="Réinitialiser" style="border-radius:10px;">
-                        <i class="bi bi-x-lg"></i>
+                    <button id="btn-reset" class="btn btn-reset-filter" title="Réinitialiser les filtres">
+                        <i class="bi bi-arrow-counterclockwise"></i>
                     </button>
                 </div>
             </div>
@@ -367,25 +447,25 @@
 
         {{-- ── Résultats header ── --}}
         <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-            <h5 class="fw-bold mb-0 text-dark">
+            <h5 class="fw-bold mb-0 text-dark d-flex align-items-center">
                 Ateliers disponibles
-                <span class="badge rounded-pill ms-1 px-3 py-1"
+                <span class="badge rounded-pill ms-2 px-3 py-1"
                       id="result-count"
-                      style="background:#0f7038; font-size:.8rem;">{{ $ateliers->total() }}</span>
+                      style="background:#0f7038; font-size:.8rem; color:#fff;">{{ $ateliers->total() }}</span>
             </h5>
             <div class="d-flex gap-2 align-items-center flex-wrap">
-                <button class="btn btn-sm btn-outline-success rounded-pill px-3 fw-semibold shadow-sm" id="btn-toggle-ai" style="background:#fff; border-color:#86efac;">
-                    <i class="bi bi-stars text-success me-1"></i>
+                <button class="action-pill-btn pill-outline-ai shadow-sm" id="btn-toggle-ai" title="Diagnostic IA de vos vêtements">
+                    <i class="bi bi-stars"></i>
                     <span id="ai-toggle-label">Diagnostic IA par Photo</span>
                 </button>
-                <button class="map-toggle-btn" id="btn-toggle-map" title="Afficher / Masquer la carte">
-                    <i class="bi bi-map-fill text-success"></i>
+                <button class="action-pill-btn pill-outline-map shadow-sm" id="btn-toggle-map" title="Afficher / Masquer la carte">
+                    <i class="bi bi-map-fill"></i>
                     <span id="map-toggle-label">Carte</span>
                 </button>
-                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="view-grid" title="Grille">
+                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="view-grid" title="Affichage Grille" style="height:36px;">
                     <i class="bi bi-grid-3x3-gap"></i>
                 </button>
-                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="view-list" title="Liste">
+                <button class="btn btn-sm btn-outline-secondary rounded-pill px-3" id="view-list" title="Affichage Liste" style="height:36px;">
                     <i class="bi bi-list-ul"></i>
                 </button>
             </div>
@@ -699,13 +779,11 @@ document.addEventListener('DOMContentLoaded', function () {
             if (isVisible) {
                 aiSection.style.display = 'none';
                 aiToggleLabel.textContent = 'Diagnostic IA par Photo';
-                btnToggleAi.classList.remove('btn-success', 'text-white');
-                btnToggleAi.classList.add('btn-outline-success');
+                btnToggleAi.classList.remove('active');
             } else {
                 aiSection.style.display = 'block';
                 aiToggleLabel.textContent = 'Masquer le Diagnostic IA';
-                btnToggleAi.classList.remove('btn-outline-success');
-                btnToggleAi.classList.add('btn-success', 'text-white');
+                btnToggleAi.classList.add('active');
                 aiSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         });
@@ -989,9 +1067,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (isVisible) {
             mapSection.style.display = 'none';
             toggleLabel.textContent = 'Carte';
+            toggleBtn.classList.remove('active');
         } else {
             mapSection.style.display = 'block';
             toggleLabel.textContent = 'Masquer';
+            toggleBtn.classList.add('active');
             initMap();
             // Multi-pass invalidateSize pour synchroniser parfaitement l'affichage du conteneur Leaflet
             requestAnimationFrame(() => {
