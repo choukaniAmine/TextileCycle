@@ -174,8 +174,13 @@
     }
     #leaflet-map {
         height: 400px;
+        min-height: 400px;
         width: 100%;
         z-index: 1;
+        background: #e5e3df;
+    }
+    .leaflet-container {
+        font-family: inherit !important;
     }
     .leaflet-popup-content-wrapper {
         border-radius: 12px !important;
@@ -649,10 +654,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
         window.leafletMap = map;
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            maxZoom: 18,
-        }).addTo(map);
+        const tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            subdomains: ['a', 'b', 'c'],
+            maxZoom: 19,
+            crossOrigin: true
+        });
+
+        tileLayer.on('tileerror', function(error, tile) {
+            console.warn('Erreur chargement tuile OSM, bascule vers CartoDB:', error);
+            // Fallback silencieux vers CartoDB si OpenStreetMap bloque
+            L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+                subdomains: 'abcd',
+                maxZoom: 19
+            }).addTo(map);
+        });
+
+        tileLayer.addTo(map);
 
         updateMapMarkers(ateliersGeo);
     }
@@ -667,8 +685,22 @@ document.addEventListener('DOMContentLoaded', function () {
             mapSection.style.display = 'block';
             toggleLabel.textContent = 'Masquer';
             initMap();
-            // Leaflet a besoin que la div soit visible pour calculer les dimensions
-            setTimeout(() => { if (map) { map.invalidateSize(true); } }, 400);
+            // Multi-pass invalidateSize pour synchroniser parfaitement l'affichage du conteneur Leaflet
+            requestAnimationFrame(() => {
+                if (map) map.invalidateSize(true);
+            });
+            setTimeout(() => {
+                if (map) {
+                    map.invalidateSize(true);
+                    if (markers.length > 0) {
+                        const bounds = markers.map(m => m.getLatLng());
+                        map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
+                    }
+                }
+            }, 250);
+            setTimeout(() => {
+                if (map) map.invalidateSize(true);
+            }, 600);
         }
     });
 
