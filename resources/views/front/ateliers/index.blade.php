@@ -536,8 +536,12 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
-{{-- ── Leaflet JS & Carte Interactive (Option C) ── --}}
+{{-- ── Leaflet JS (chargé avant le script carte) ── --}}
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN2GqaI=" crossorigin=""></script>
+@endpush
+
+@push('scripts')
+{{-- ── Carte Interactive Leaflet (Option C) ── --}}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
     // Données géographiques depuis PHP
@@ -664,7 +668,7 @@ document.addEventListener('DOMContentLoaded', function () {
             toggleLabel.textContent = 'Masquer';
             initMap();
             // Leaflet a besoin que la div soit visible pour calculer les dimensions
-            setTimeout(() => { if (map) map.invalidateSize(); }, 150);
+            setTimeout(() => { if (map) { map.invalidateSize(true); } }, 400);
         }
     });
 
