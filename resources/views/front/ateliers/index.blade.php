@@ -573,8 +573,8 @@
                             </div>
 
                             <div class="border-top pt-3">
-                                <div class="fw-bold small text-dark mb-2">🧵 Prestations recommandées en atelier :</div>
-                                <div class="d-flex flex-wrap gap-2" id="aiMatchingServicesList"></div>
+                                <div class="fw-bold small text-dark mb-2"><i class="bi bi-shop text-success me-1"></i> Ateliers partenaires recommandés pour cette retouche :</div>
+                                <div class="d-flex flex-column gap-2" id="aiMatchingServicesList"></div>
                             </div>
                         </div>
                     </div>
@@ -956,17 +956,41 @@ document.addEventListener('DOMContentLoaded', function () {
         const servicesWrap = document.getElementById('aiMatchingServicesList');
         servicesWrap.innerHTML = '';
 
-        if (data.matching_services && data.matching_services.length > 0) {
-            data.matching_services.forEach(s => {
-                const badge = document.createElement('a');
-                badge.href = s.atelier_url;
-                badge.className = 'btn btn-sm btn-outline-success rounded-pill px-3 py-1 text-decoration-none';
-                badge.style.fontSize = '.8rem';
-                badge.innerHTML = `<strong>${s.nom}</strong> · ${s.tarif_estime} DT <small class="text-muted">(${s.atelier_nom} - ${s.atelier_ville})</small> &rarr;`;
-                servicesWrap.appendChild(badge);
+        if (data.matching_ateliers && data.matching_ateliers.length > 0) {
+            data.matching_ateliers.slice(0, 3).forEach(a => {
+                const card = document.createElement('div');
+                card.className = 'd-flex align-items-center justify-content-between p-2 px-3 rounded-3 border bg-light w-100';
+                card.innerHTML = `
+                    <div class="d-flex align-items-center gap-2">
+                        <i class="bi bi-shop text-success fs-5"></i>
+                        <div>
+                            <strong class="d-block small text-dark">${a.nom}</strong>
+                            <small class="text-muted"><i class="bi bi-geo-alt text-danger me-1"></i>${a.ville} ${a.adresse ? '· ' + a.adresse : ''}</small>
+                        </div>
+                    </div>
+                    <a href="${a.url}" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold text-white text-decoration-none shadow-sm" style="background:linear-gradient(135deg,#0f7038,#1a9e52); border:none; font-size:.78rem;">
+                        Consulter & Devis &rarr;
+                    </a>
+                `;
+                servicesWrap.appendChild(card);
+            });
+        } else if (data.matching_services && data.matching_services.length > 0) {
+            data.matching_services.slice(0, 2).forEach(s => {
+                const card = document.createElement('div');
+                card.className = 'd-flex align-items-center justify-content-between p-2 px-3 rounded-3 border bg-light w-100';
+                card.innerHTML = `
+                    <div>
+                        <strong class="d-block small text-dark">${s.nom}</strong>
+                        <small class="text-muted">${s.atelier_nom} · ${s.atelier_ville} · ~${s.tarif_estime} DT</small>
+                    </div>
+                    <a href="${s.atelier_url}" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold text-white text-decoration-none shadow-sm" style="background:linear-gradient(135deg,#0f7038,#1a9e52); border:none; font-size:.78rem;">
+                        Voir l'atelier &rarr;
+                    </a>
+                `;
+                servicesWrap.appendChild(card);
             });
         } else {
-            servicesWrap.innerHTML = '<span class="text-muted small">Consultez nos ateliers pour un avis sur mesure.</span>';
+            servicesWrap.innerHTML = '<span class="text-muted small">Consultez le catalogue pour choisir votre atelier partenaire.</span>';
         }
 
         aiResultCard.classList.remove('d-none');
