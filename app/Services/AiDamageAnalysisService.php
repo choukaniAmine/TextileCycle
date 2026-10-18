@@ -75,15 +75,15 @@ class AiDamageAnalysisService
     }
 
     /**
-     * Appel à l'API Google Gemini Vision avec cascade de modèles en cas de 503 haute demande.
+     * Appel à l'API Google Gemini Vision avec cascade de modèles actifs et non saturés.
      */
     protected function callGeminiVision(string $apiKey, string $primaryModel, array $imageData): ?array
     {
         $modelsToTry = array_unique([
             $primaryModel,
-            'gemini-flash-latest',
-            'gemini-3.5-flash',
-            'gemini-3.8-flash-lite-tts',
+            'gemini-flash-lite-latest',
+            'gemini-3-flash-preview',
+            'gemini-3.8-flash',
         ]);
 
         foreach ($modelsToTry as $index => $model) {
