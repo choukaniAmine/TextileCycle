@@ -29,12 +29,22 @@ class AiDamageAnalysisService
             $aiResult = $this->callGeminiVision($apiKey, $model, $imageData);
         }
 
-        // 3. Fallback intelligent si l'API n'a pas répondu ou en cas de problème réseau
-        if (!$aiResult) {
-            $aiResult = $this->getMockAnalysis($image);
+        // Si l'API retourne un résultat valide
+        if ($aiResult) {
+            // Si l'image n'est pas un vêtement ou ne présente aucun dommage textile
+            if (isset($aiResult['is_valid_garment_damage']) && $aiResult['is_valid_garment_damage'] === false) {
+                return $aiResult;
+            }
+
+            // Associer les résultats IA avec la BDD TextileCycle (Services & Ateliers réels)
+            $aiResult['matching_services'] = $this->findMatchingServices($aiResult['suggested_service_keywords'] ?? []);
+            $aiResult['matching_ateliers'] = $this->findMatchingAteliers($aiResult['matching_services']);
+
+            return $aiResult;
         }
 
-        // 4. Associer les résultats IA avec la BDD TextileCycle (Services & Ateliers réels)
+        // 3. Fallback uniquement en cas de panne réseau ou de mock explicite en test
+        $aiResult = $this->getMockAnalysis($image);
         $aiResult['matching_services'] = $this->findMatchingServices($aiResult['suggested_service_keywords'] ?? []);
         $aiResult['matching_ateliers'] = $this->findMatchingAteliers($aiResult['matching_services']);
 
@@ -66,22 +76,42 @@ class AiDamageAnalysisService
     protected function callGeminiVision(string $apiKey, string $model, array $imageData): ?array
     {
         $prompt = <<<PROMPT
-Tu es un expert mondial en confection textile, retouche, réparation et économie circulaire de vêtements.
-Analyse précisément la photo fournie représentant un vêtement ou accessoire textile abîmé.
+Tu es un expert vérificateur et maître tailleur en confection textile, retouche et économie circulaire de vêtements.
+Examine attentivement l'image fournie.
 
-Renvoie UNIQUEMENT un objet JSON valide (sans balises markdown ```json, aucun texte superflu) avec exactement cette structure :
+RÈGLE ABSOLUE DE VALIDATION :
+1. Si l'image NE REPRÉSENTE PAS un vêtement, un textile ou un accessoire vestimentaire (par exemple : un visage, un paysage, un animal, un objet non textile, un écran d'ordinateur, un dessin abstrait, un document, une voiture, etc.) :
+   Tu DOIS renvoyer :
+   {
+     "is_valid_garment_damage": false,
+     "rejection_reason": "not_a_garment",
+     "rejection_message": "L'image fournie ne semble pas être un vêtement ou un article textile. Veuillez téléverser une photo claire d'une pièce vestimentaire (jean, veste, chemise, robe, etc.)."
+   }
+
+2. Si l'image représente un vêtement mais qu'il est EN PARFAIT ÉTAT et ne présente AUCUN dommage, ni trou, ni déchirure, ni tache, ni bouton manquant, ni fermeture cassée :
+   Tu DOIS renvoyer :
+   {
+     "is_valid_garment_damage": false,
+     "rejection_reason": "no_damage_detected",
+     "rejection_message": "Aucun dommage ou besoin de réparation visible n'a été détecté sur ce vêtement. Si un accroc est présent, prenez une photo plus rapprochée et bien éclairée de la zone abîmée."
+   }
+
+3. UNIQUEMENT si l'image est un vêtement / textile AVEC un dommage, une usure ou un besoin de retouche avéré, renvoie :
 {
-  "garment_type": "Type de vêtement identifié (ex: Jean en denim, Veste en laine, Chemise coton, Robe, Manteau...)",
-  "material_detected": "Matière probable détectée (ex: Coton épais, Lin, Denim, Laine mérinos, Soie...)",
-  "damage_type": "Nom précis du dommage (ex: Déchirure sur couture, Fermeture éclair cassée, Trou d'usure, Ourlet décousu, Tache tenace...)",
-  "damage_description": "Description concise en 2-3 phrases de l'état du vêtement et du problème visible.",
+  "is_valid_garment_damage": true,
+  "garment_type": "Type précis de vêtement (ex: Jean denim, Veste tailleur, Chemise coton, Manteau laine...)",
+  "material_detected": "Matière textile identifiée (ex: Denim 100% coton, Lin lavé, Soie, Laine mérinos, Polyester...)",
+  "damage_type": "Nom précis du dommage (ex: Déchirure sur couture, Fermeture éclair bloquée, Trou d'usure, Ourlet décousu...)",
+  "damage_description": "Description concise en 2-3 phrases de l'état visible du textile et de la zone affectée.",
   "severity": "Faible | Moyenne | Élevée",
-  "repairability_score": 8, // Note entière de 1 à 10 sur la facilité et pertinence de réparation
-  "repair_advice": "Conseil professionnel précis pour prolonger la durée de vie de cette pièce textile.",
-  "suggested_repair": "Action concrète recommandée (ex: Remplacement de zip, Pose de patch / empiècement, Reprise de couture, Ajustement...)",
-  "suggested_service_keywords": ["fermeture", "zip", "couture", "retouche", "patch", "ourlet"], // 3 à 5 mots-clés simples pour matcher des services en base de données
+  "repairability_score": 8, // Note entière de 1 à 10
+  "repair_advice": "Conseil professionnel précis pour réussir la réparation et prolonger la vie de la pièce.",
+  "suggested_repair": "Action concrète recommandée (ex: Reprise d'accroc, Pose d'empiècement, Remplacement de zip...)",
+  "suggested_service_keywords": ["fermeture", "zip", "couture", "retouche", "ourlet", "patch"],
   "eco_impact_benefit": "Environ 6.5 kg de CO₂ et 2 500 L d'eau préservés en réparant plutôt qu'en rachetant neuf."
 }
+
+Réponds STRICTEMENT avec un JSON valide, sans formatage markdown ```json.
 PROMPT;
 
         try {
@@ -102,7 +132,7 @@ PROMPT;
                     ]
                 ],
                 'generationConfig' => [
-                    'temperature' => 0.2,
+                    'temperature' => 0.1,
                     'topP' => 0.8,
                     'responseMimeType' => 'application/json',
                 ]
@@ -116,7 +146,7 @@ PROMPT;
                     $cleaned = preg_replace('/^```(?:json)?/i', '', $cleaned);
                     $cleaned = preg_replace('/```$/', '', $cleaned);
                     $decoded = json_decode(trim($cleaned), true);
-                    if (is_array($decoded) && isset($decoded['garment_type'])) {
+                    if (is_array($decoded)) {
                         $decoded['source'] = 'gemini_ai';
                         return $decoded;
                     }
@@ -141,6 +171,7 @@ PROMPT;
     {
         return [
             'source' => 'demo_smart_analysis',
+            'is_valid_garment_damage' => true,
             'garment_type' => 'Pantalon Jean / Denim',
             'material_detected' => 'Denim de coton renforcé',
             'damage_type' => 'Accroc / Déchirure au niveau de l\'entrejambe ou genou',

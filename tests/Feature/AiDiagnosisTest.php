@@ -80,4 +80,40 @@ class AiDiagnosisTest extends TestCase
                 ]
             ]);
     }
+
+    public function test_ai_diagnosis_handles_non_garment_or_undamaged_rejection(): void
+    {
+        // Mocking Http to simulate Gemini rejecting a non-garment image
+        Http::fake([
+            'generativelanguage.googleapis.com/*' => Http::response([
+                'candidates' => [
+                    [
+                        'content' => [
+                            'parts' => [
+                                [
+                                    'text' => json_encode([
+                                        'is_valid_garment_damage' => false,
+                                        'rejection_reason' => 'not_a_garment',
+                                        'rejection_message' => "L'image fournie ne semble pas être un vêtement ou un article textile.",
+                                    ])
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ], 200)
+        ]);
+
+        $content = base64_decode('/9j/4AAQSkZJRgABAQEASABIAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////wgALCAABAAEBAREA/8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPxA=');
+        $file = UploadedFile::fake()->createWithContent('paysage.jpg', $content);
+
+        $response = $this->postJson(route('ateliers.ai.diagnose'), [
+            'photo' => $file,
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.is_valid_garment_damage', false)
+            ->assertJsonPath('data.rejection_reason', 'not_a_garment');
+    }
 }

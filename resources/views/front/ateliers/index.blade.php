@@ -524,6 +524,23 @@
                             <p class="text-muted small mb-0">L'IA examine les fibres, le type d'usure et calcule l'indice de réparabilité.</p>
                         </div>
 
+                        {{-- État de Rejet IA (Pas un vêtement ou aucun dommage) --}}
+                        <div id="aiRejectionCard" class="bg-white rounded-4 p-4 shadow-sm border border-light d-none text-center">
+                            <div class="mb-3 mx-auto d-flex align-items-center justify-content-center rounded-circle"
+                                 id="aiRejectionIconWrap"
+                                 style="width: 68px; height: 68px; background: #fff4e5; color: #f59e0b;">
+                                <i class="bi bi-question-circle-fill fs-1" id="aiRejectionIcon"></i>
+                            </div>
+                            <h5 class="fw-bold text-dark mb-2" id="aiRejectionTitle">Analyse impossible</h5>
+                            <p class="text-secondary small mb-3 mx-auto" style="max-width: 440px;" id="aiRejectionMessage">
+                                L'image fournie ne semble pas correspondre à un vêtement ou ne présente aucune déchirure détectable.
+                            </p>
+                            <div class="d-inline-flex align-items-center gap-2 p-2 px-3 rounded-pill" style="background: #f1f5f9; font-size: .8rem; color: #475569;">
+                                <i class="bi bi-info-circle-fill text-primary"></i>
+                                <span>Conseil : Prenez une photo nette et rapprochée de la zone textile abîmée.</span>
+                            </div>
+                        </div>
+
                         {{-- Panneau Résultat IA --}}
                         <div id="aiResultCard" class="bg-white rounded-4 p-4 shadow-sm border border-light d-none">
                             <div class="d-flex justify-content-between align-items-start mb-3">
@@ -767,9 +784,14 @@ document.addEventListener('DOMContentLoaded', function () {
     const aiBtnChange     = document.getElementById('aiBtnChangePhoto');
     const btnLaunchAi     = document.getElementById('btnLaunchAiDiagnosis');
 
-    const aiWaitingState  = document.getElementById('aiWaitingState');
-    const aiLoadingState  = document.getElementById('aiLoadingState');
-    const aiResultCard    = document.getElementById('aiResultCard');
+    const aiWaitingState    = document.getElementById('aiWaitingState');
+    const aiLoadingState    = document.getElementById('aiLoadingState');
+    const aiResultCard      = document.getElementById('aiResultCard');
+    const aiRejectionCard   = document.getElementById('aiRejectionCard');
+    const aiRejectionTitle  = document.getElementById('aiRejectionTitle');
+    const aiRejectionMsg    = document.getElementById('aiRejectionMessage');
+    const aiRejectionIcon   = document.getElementById('aiRejectionIcon');
+    const aiRejectionWrap   = document.getElementById('aiRejectionIconWrap');
 
     let selectedAiFile    = null;
 
@@ -850,6 +872,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             aiWaitingState.classList.add('d-none');
             aiResultCard.classList.add('d-none');
+            if (aiRejectionCard) aiRejectionCard.classList.add('d-none');
             aiLoadingState.classList.remove('d-none');
 
             const formData = new FormData();
@@ -887,6 +910,30 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function renderAiResult(data) {
+        // Cas 1 : Rejet (Pas un vêtement ou aucun dommage textile)
+        if (data.is_valid_garment_damage === false) {
+            aiResultCard.classList.add('d-none');
+            if (aiRejectionCard) {
+                if (data.rejection_reason === 'not_a_garment') {
+                    aiRejectionTitle.textContent = 'Objet non textile ou non reconnu';
+                    aiRejectionWrap.style.background = '#fee2e2';
+                    aiRejectionWrap.style.color = '#ef4444';
+                    aiRejectionIcon.className = 'bi bi-x-octagon-fill fs-1';
+                } else {
+                    aiRejectionTitle.textContent = 'Aucun dommage détecté';
+                    aiRejectionWrap.style.background = '#e0f2fe';
+                    aiRejectionWrap.style.color = '#0284c7';
+                    aiRejectionIcon.className = 'bi bi-check-circle-fill fs-1';
+                }
+                aiRejectionMsg.textContent = data.rejection_message || 'Impossible d\'identifier une déchirure ou un dommage nécessitant retouche.';
+                aiRejectionCard.classList.remove('d-none');
+            }
+            return;
+        }
+
+        // Cas 2 : Vêtement abîmé valide
+        if (aiRejectionCard) aiRejectionCard.classList.add('d-none');
+
         document.getElementById('aiGarmentType').textContent = data.garment_type || 'Vêtement analysé';
         document.getElementById('aiMaterialDetected').textContent = 'Matière détectée : ' + (data.material_detected || 'Textile standard');
         document.getElementById('aiDamageType').textContent = (data.damage_type || 'Dégât détecté') + (data.severity ? ' (' + data.severity + ')' : '');
