@@ -23,6 +23,10 @@ class DemandeRequest extends FormRequest
             'photo' => ['nullable', 'image', 'max:2048'],
             'urgent' => ['nullable', 'boolean'],
             'date_souhaitee' => ['nullable', 'date', 'after_or_equal:today'],
+            // IA : caractéristiques utilisées pour l'estimation du temps de travail
+            'categorie_vetement' => ['nullable', Rule::in(array_keys(config('repair.categories')))],
+            'type_intervention' => ['nullable', Rule::in(array_keys(config('repair.interventions')))],
+            'niveau_difficulte' => ['nullable', 'integer', 'between:1,3'],
         ];
     }
 
@@ -31,6 +35,8 @@ class DemandeRequest extends FormRequest
         return [
             'titre' => 'titre', 'type' => 'type de demande', 'vetement' => 'vêtement',
             'description' => 'description', 'photo' => 'photo', 'date_souhaitee' => 'date souhaitée',
+            'categorie_vetement' => 'type de vêtement', 'type_intervention' => 'type d’intervention',
+            'niveau_difficulte' => 'ampleur du travail',
         ];
     }
 }

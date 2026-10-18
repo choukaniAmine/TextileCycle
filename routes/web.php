@@ -78,6 +78,10 @@ Route::middleware('auth')->group(function () {
 
     // Module 4 — Demandes (particulier / association)
     Route::middleware('role:particulier,association')->group(function () {
+        // IA (doivent rester avant la route resource)
+        Route::post('mes-demandes/estimation', Front\EstimationController::class)->middleware('throttle:60,1')->name('demandes.estimation');
+        Route::post('mes-demandes/assistant', Front\AssistantController::class)->middleware('throttle:20,1')->name('demandes.assistant');
+
         Route::resource('mes-demandes', Front\DemandeController::class)
             ->parameters(['mes-demandes' => 'demande'])->names('demandes');
         Route::patch('mes-demandes/{demande}/annuler', [Front\DemandeController::class, 'cancel'])->name('demandes.cancel');
@@ -90,6 +94,7 @@ Route::middleware('auth')->group(function () {
         Route::get('travaux', [Atelier\DemandeController::class, 'mesTravaux'])->name('travaux.index');
         Route::get('travaux/{demande}', [Atelier\DemandeController::class, 'show'])->name('travaux.show');
         Route::post('travaux/{demande}/liberer', [Atelier\DemandeController::class, 'liberer'])->name('travaux.liberer');
+        Route::patch('travaux/{demande}/duree', [Atelier\DureeController::class, 'update'])->name('travaux.duree');
         Route::post('travaux/{demande}/interventions', [Atelier\InterventionController::class, 'store'])->name('interventions.store');
         Route::get('interventions/{intervention}/edit', [Atelier\InterventionController::class, 'edit'])->name('interventions.edit');
         Route::put('interventions/{intervention}', [Atelier\InterventionController::class, 'update'])->name('interventions.update');

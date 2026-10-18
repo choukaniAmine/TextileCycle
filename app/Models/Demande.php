@@ -18,6 +18,10 @@ class Demande extends Model
     protected $fillable = [
         'user_id', 'atelier_id', 'titre', 'type', 'vetement', 'description',
         'photo', 'urgent', 'date_souhaitee', 'statut',
+        // IA : estimation locale du temps de travail
+        'categorie_vetement', 'type_intervention', 'niveau_difficulte',
+        'duree_estimee_min', 'estimation',
+        'duree_reelle_min', 'duree_reelle_source', 'duree_reelle_confirmee_at',
     ];
 
     protected function casts(): array
@@ -27,6 +31,9 @@ class Demande extends Model
             'statut' => Statut::class,
             'urgent' => 'boolean',
             'date_souhaitee' => 'date',
+            'estimation' => 'array',
+            'niveau_difficulte' => 'integer',
+            'duree_reelle_confirmee_at' => 'datetime',
         ];
     }
 

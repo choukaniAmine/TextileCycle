@@ -30,6 +30,8 @@
                 @endif
             </div>
         </div>
+
+        @include('partials.estimation-card', ['demande' => $demande])
     </div>
 
     <div class="col-lg-7">

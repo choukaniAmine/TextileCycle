@@ -8,11 +8,13 @@ use App\Http\Requests\DemandeRequest;
 use App\Models\Demande;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use App\Enums\UserRole;
 use App\Models\User;
 use App\Notifications\DemandeNotification;
+use App\Services\Ml\RepairTimeEstimator;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
+
 class DemandeController extends Controller
 {
     public function index(Request $request)
@@ -43,10 +45,15 @@ class DemandeController extends Controller
         }
 
         $demande = $request->user()->demandes()->create($data);
-Notification::send(
-    User::where('role', UserRole::Atelier)->where('is_active', true)->get(),
-    new DemandeNotification($demande, "Nouvelle demande disponible : {$demande->titre}", '📥', route('atelier.demandes.disponibles', [], false))
-);
+
+        // IA n°1 : estimation locale du temps de travail (ne bloque jamais l'enregistrement)
+        app(RepairTimeEstimator::class)->estimateAndStore($demande);
+
+        Notification::send(
+            User::where('role', UserRole::Atelier)->where('is_active', true)->get(),
+            new DemandeNotification($demande, "Nouvelle demande disponible : {$demande->titre}", '📥', route('atelier.demandes.disponibles', [], false))
+        );
+
         return redirect()->route('demandes.show', $demande)->with('success', 'Votre demande a bien été envoyée 🧵');
     }
 
@@ -83,6 +90,9 @@ Notification::send(
         }
         $demande->update($data);
 
+        // Les caractéristiques ont pu changer : on recalcule l'estimation
+        app(RepairTimeEstimator::class)->estimateAndStore($demande->refresh());
+
         return redirect()->route('demandes.show', $demande)->with('success', 'Demande mise à jour.');
     }
 
@@ -107,8 +117,8 @@ Notification::send(
         return redirect()->route('demandes.index')->with('success', 'Demande supprimée.');
     }
 
- private function authorizeOwner(Demande $demande): void
-{
-    abort_unless($demande->user_id === request()->user()->getAuthIdentifier(), 403);
-}
+    private function authorizeOwner(Demande $demande): void
+    {
+        abort_unless((int) $demande->user_id === (int) request()->user()->getAuthIdentifier(), 403);
+    }
 }

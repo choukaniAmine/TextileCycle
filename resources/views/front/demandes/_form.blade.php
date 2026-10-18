@@ -1,6 +1,9 @@
 @csrf
 <div class="demande-form">
 
+    {{-- Assistant intelligent (IA n°2 – Grok) : analyse et préremplit, l'utilisateur confirme --}}
+    @include('front.demandes._assistant')
+
     {{-- Étape 1 : type de demande --}}
     <div class="form-section-title"><span class="num">1</span> Que souhaitez-vous faire ?</div>
     <div class="row g-3">
@@ -49,6 +52,9 @@
                   class="form-control @error('description') is-invalid @enderror">{{ old('description', $demande->description) }}</textarea>
         @error('description')<div class="invalid-feedback">{{ $message }}</div>@enderror
     </div>
+
+    {{-- Précisions techniques + estimation locale du temps (IA n°1) --}}
+    @include('front.demandes._ai_fields')
 
     <hr class="form-divider">
 

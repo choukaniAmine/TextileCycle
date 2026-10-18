@@ -23,6 +23,8 @@
                     <button class="btn btn-outline-secondary btn-sm">Me désister</button></form>
             @endif
         </div>
+        @include('partials.estimation-card', ['demande' => $demande])
+        @include('atelier.travaux._duree', ['demande' => $demande])
     </div>
 
     <div class="col-lg-7">
