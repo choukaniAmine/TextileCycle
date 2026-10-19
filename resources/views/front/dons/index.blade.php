@@ -15,7 +15,7 @@
                class="btn btn-sm {{ request('status') === $s->value ? 'btn-'.$s->badge() : 'btn-outline-'.$s->badge() }}">{{ $s->label() }}</a>
         @endforeach
     </div>
-
+   
     <div class="table-responsive">
         <table class="table align-middle">
             <thead><tr><th>Référence</th><th>Association</th><th>Vêtements</th><th>Date</th><th>Statut</th><th></th></tr></thead>

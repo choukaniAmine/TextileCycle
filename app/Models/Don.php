@@ -23,9 +23,12 @@ class Don extends Model
     protected function casts(): array
     {
         return [
-            'status' => DonStatus::class,
-            'donated_at' => 'date',
-            'quantity' => 'integer',
+            'status'                 => DonStatus::class,
+            'donated_at'             => 'date',
+            'quantity'               => 'integer',
+            'acceptance_probability' => 'float',
+            'priority_score'         => 'float',
+            'scored_at'              => 'datetime',
         ];
     }
 
@@ -36,7 +39,6 @@ class Don extends Model
             $don->status ??= DonStatus::EnAttente;
         });
 
-        // Suivi de l'état : chaque création / changement de statut est journalisé.
         static::created(fn (Don $don) => $don->logStatus());
         static::updated(function (Don $don) {
             if ($don->wasChanged('status')) {
@@ -45,7 +47,6 @@ class Don extends Model
         });
     }
 
-    /** Don N ─── 1 Association */
     public function association(): BelongsTo
     {
         return $this->belongsTo(Association::class);
