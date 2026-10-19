@@ -39,6 +39,7 @@ Route::get('/inscription', fn () => redirect()->route('register'));
 // POST rétrocompatibles (les formulaires existants envoient vers /connexion et /inscription)
 Route::post('/connexion', [\Laravel\Fortify\Http\Controllers\AuthenticatedSessionController::class, 'store'])->middleware('guest');
 Route::post('/inscription', [\Laravel\Fortify\Http\Controllers\RegisteredUserController::class, 'store'])->middleware('guest');
+Route::post('/logout', [\App\Http\Controllers\Auth\AuthController::class, 'logout'])->name('logout');
 
 // ==========================================
 // 2. FRONT OFFICE — UTILISATEUR CONNECTÉ

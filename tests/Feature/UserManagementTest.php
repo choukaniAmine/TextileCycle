@@ -137,4 +137,17 @@ class UserManagementTest extends TestCase
         $user->refresh();
         $this->assertNull($user->two_factor_secret);
     }
+
+    public function test_user_can_logout_and_receive_goodbye_message(): void
+    {
+        $user = User::factory()->create([
+            'name' => 'Camille Martin',
+        ]);
+
+        $response = $this->actingAs($user)->post('/logout');
+
+        $response->assertRedirect('/');
+        $response->assertSessionHas('success', 'Au revoir Camille Martin ! Vous avez été déconnecté avec succès. À bientôt sur ReFashion !');
+        $this->assertGuest();
+    }
 }

@@ -79,8 +79,10 @@
             {{-- ============ Zone compte ============ --}}
             <div class="rf-actions mt-3 mt-xl-0">
                 @auth
-                    @php($me = auth()->user())
-                    @php($nbNotifs = $me->unreadNotifications()->count())
+                    @php
+                        $me = auth()->user();
+                        $nbNotifs = $me->unreadNotifications()->count();
+                    @endphp
 
                     {{-- Notifications --}}
                     <a class="rf-icon-btn" href="{{ route('notifications.index') }}" title="Notifications">
@@ -133,11 +135,9 @@
 
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <form method="POST" action="{{ route('logout') }}" class="m-0">@csrf
-                                    <button type="submit" class="dropdown-item text-danger">
-                                        <i class="bi bi-box-arrow-right"></i> Déconnexion
-                                    </button>
-                                </form>
+                                <button type="button" class="dropdown-item text-danger d-flex align-items-center gap-2" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal">
+                                    <i class="bi bi-box-arrow-right"></i> Déconnexion
+                                </button>
                             </li>
                         </ul>
                     </div>
@@ -189,8 +189,76 @@
         &copy; {{ date('Y') }} – Économie circulaire &amp; consommation textile responsable.
     </div>
 </footer>
+@auth
+    @php $me = auth()->user(); @endphp
+    <!-- Modal Confirmation Déconnexion ReFashion -->
+    <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg" style="border-radius: 1.25rem; overflow: hidden;">
+                <div class="modal-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="rounded-circle d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background: rgba(220, 53, 69, 0.1); color: #dc3545; font-size: 1.25rem;">
+                            <i class="bi bi-box-arrow-right"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title fw-bold text-dark mb-0" id="logoutConfirmModalLabel">Déconnexion</h5>
+                            <small class="text-muted">Session ReFashion</small>
+                        </div>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fermer"></button>
+                </div>
+                <div class="modal-body px-4 py-3">
+                    <div class="d-flex align-items-center gap-3 p-3 mb-3 bg-light rounded-3 border">
+                        @if ($me->avatar)
+                            <img src="{{ $me->avatarUrl() }}" alt="{{ $me->name }}" class="rounded-circle" style="width:46px;height:46px;object-fit:cover;">
+                        @else
+                            <span class="badge bg-secondary rounded-circle" style="width:46px;height:46px;display:inline-flex;align-items:center;justify-content:center;font-size:1.1rem;">
+                                {{ strtoupper(substr($me->name, 0, 1)) }}
+                            </span>
+                        @endif
+                        <div class="text-truncate">
+                            <div class="fw-bold text-dark text-truncate">{{ $me->name }}</div>
+                            <div class="text-muted small text-truncate">{{ $me->email }}</div>
+                            <span class="badge bg-white text-secondary border mt-1">{{ $me->role->label() }}</span>
+                        </div>
+                    </div>
+                    <p class="text-secondary mb-2">
+                        Êtes-vous sûr de vouloir vous déconnecter de votre compte <strong>ReFashion</strong> ?
+                    </p>
+                    <div class="p-2 px-3 rounded-2 text-success small d-flex align-items-center gap-2" style="background-color: #f0fdf4 !important; border: 1px solid #bbf7d0;">
+                        <i class="bi bi-shield-check fs-6 text-success"></i>
+                        <span>Vos devis d'ateliers simulés et vos données restent sauvegardés pour votre prochaine visite.</span>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 px-4 pb-4 pt-2 d-flex justify-content-end gap-2">
+                    <button type="button" class="btn btn-outline-secondary px-4 py-2" style="border-radius: 9999px;" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i> Rester connecté
+                    </button>
+                    <form method="POST" action="{{ route('logout') }}" id="logoutFormFront" class="m-0">
+                        @csrf
+                        <button type="submit" class="btn btn-danger px-4 py-2 fw-semibold" style="border-radius: 9999px;" id="logoutSubmitBtnFront">
+                            <i class="bi bi-box-arrow-right me-1"></i> Se déconnecter
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@endauth
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('templates/frontoffice/js/scripts.js') }}"></script>
+@auth
+<script>
+    document.getElementById('logoutFormFront')?.addEventListener('submit', function() {
+        const btn = document.getElementById('logoutSubmitBtnFront');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Déconnexion en cours...';
+        }
+    });
+</script>
+@endauth
 @stack('scripts')
 </body>
 </html>
