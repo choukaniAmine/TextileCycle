@@ -13,4 +13,5 @@ class Categorie extends Model
     {
         return $this->hasMany(Vetement::class);
     }
+    
 }
