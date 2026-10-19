@@ -14,17 +14,27 @@
 
 <div class="card">
     <div class="card-header">
-        <form method="GET" class="form-inline">
+        <form method="GET" class="form-inline w-100">
             @if (request('status'))<input type="hidden" name="status" value="{{ request('status') }}">@endif
+            
             <input type="text" name="q" value="{{ request('q') }}" class="form-control mr-2" placeholder="Référence ou contenu…">
             <select name="association" class="form-control mr-2">
                 <option value="">Toutes les associations</option>
                 @foreach ($associations as $a)<option value="{{ $a->id }}" @selected((string) request('association') === (string) $a->id)>{{ $a->name }}</option>@endforeach
             </select>
             <button class="btn btn-secondary mr-2"><i class="fas fa-search"></i></button>
-            <a href="{{ route('admin.dons.create') }}" class="btn btn-primary ml-auto"><i class="fas fa-plus"></i> Nouveau don</a>
+            
+            {{-- BOUTON TRIAGE IA DEPLACE ICI (ml-auto le pousse à droite) --}}
+            <a href="{{ route('admin.dons.priority') }}" class="btn btn-success ml-auto mr-2">
+                <i class="fas fa-robot"></i> Triage IA
+            </a>
+            
+            <a href="{{ route('admin.dons.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Nouveau don
+            </a>
         </form>
     </div>
+    
     <div class="card-body table-responsive p-0">
         <table class="table table-hover">
             <thead><tr><th>Référence</th><th>Association</th><th>Contenu</th><th>Donateur</th><th>Date</th><th>Statut</th><th class="text-right">Actions</th></tr></thead>

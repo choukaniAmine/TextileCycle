@@ -10,6 +10,7 @@
         </div>
     @else
         <h2 class="mb-1">Dons reçus</h2>
+        
         <p class="text-muted">{{ $association->name }} — acceptez ou refusez les dons, puis suivez leur collecte jusqu’à la livraison.</p>
 
         {{-- Filtre par statut avec compteurs --}}
@@ -19,6 +20,8 @@
                 <a href="{{ route('espace.dons.index', ['status' => $s->value]) }}"
                    class="btn btn-sm {{ request('status') === $s->value ? 'btn-'.$s->badge() : 'btn-outline-'.$s->badge() }}">{{ $s->label() }} ({{ $counts[$s->value] ?? 0 }})</a>
             @endforeach
+        </div>
+       
         </div>
 
         <div class="table-responsive">
