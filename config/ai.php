@@ -16,10 +16,10 @@ return [
     | API recommandée par la documentation xAI : POST {base_url}/responses
     | Modèles disponibles : https://docs.x.ai/developers/models
     */
-    'grok' => [
+   'grok' => [
         'key' => env('XAI_API_KEY'),
-        'base_url' => env('XAI_BASE_URL', 'https://api.x.ai/v1'),
-        'model' => env('XAI_MODEL', 'grok-4.7'),
+        'base_url' => env('XAI_BASE_URL', 'https://api.groq.com/openai/v1'),
+        'model' => env('XAI_MODEL', 'openai/gpt-oss-20b'),
         'connect_timeout' => 5,
         'timeout' => (int) env('XAI_TIMEOUT', 30),
         'max_output_tokens' => 1500,
