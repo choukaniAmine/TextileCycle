@@ -76,6 +76,19 @@
                     @endif
                     @error('image') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                 </div>
+            <div class="row">
+                <div class="col-md-6 form-group">
+                    <label for="latitude"><i class="fas fa-map-marker-alt text-danger"></i> Latitude (GPS)</label>
+                    <input type="number" step="any" name="latitude" id="latitude" value="{{ old('latitude', $atelier->latitude) }}" class="form-control @error('latitude') is-invalid @enderror" placeholder="Ex: 36.8002000">
+                    <small class="text-muted">Pour le repérage sur la carte interactive OpenStreetMap</small>
+                    @error('latitude') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                </div>
+                <div class="col-md-6 form-group">
+                    <label for="longitude"><i class="fas fa-map-marker-alt text-danger"></i> Longitude (GPS)</label>
+                    <input type="number" step="any" name="longitude" id="longitude" value="{{ old('longitude', $atelier->longitude) }}" class="form-control @error('longitude') is-invalid @enderror" placeholder="Ex: 10.1805000">
+                    <small class="text-muted">Ex: 10.1805 pour Tunis, 10.6346 pour Sousse</small>
+                    @error('longitude') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                </div>
             </div>
 
             <div class="form-group custom-control custom-switch mt-2">

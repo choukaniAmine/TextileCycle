@@ -63,10 +63,16 @@ class AuthController extends Controller
 
     public function logout(Request $request): RedirectResponse
     {
+        $userName = $request->user()?->name;
+
         Auth::logout();
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('home');
+        $message = $userName
+            ? "Au revoir {$userName} ! Vous avez été déconnecté avec succès. À bientôt sur ReFashion !"
+            : "Vous avez été déconnecté avec succès. À bientôt sur ReFashion !";
+
+        return redirect()->route('home')->with('success', $message);
     }
 }

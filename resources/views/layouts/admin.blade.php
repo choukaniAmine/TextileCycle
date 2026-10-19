@@ -26,9 +26,9 @@
                 <span class="nav-link">{{ auth()->user()->name }}</span>
             </li>
             <li class="nav-item">
-                <form method="POST" action="{{ route('logout') }}" class="m-0">@csrf
-                    <button class="btn btn-link nav-link"><i class="fas fa-sign-out-alt"></i> Déconnexion</button>
-                </form>
+                <button type="button" class="btn btn-link nav-link text-danger font-weight-bold" data-toggle="modal" data-target="#adminLogoutModal">
+                    <i class="fas fa-sign-out-alt"></i> Déconnexion
+                </button>
             </li>
         </ul>
     </nav>
@@ -109,9 +109,52 @@
 
     <footer class="main-footer"><strong>{{ config('app.name') }}</strong> – Back office</footer>
 </div>
+
+<!-- Modal Confirmation Déconnexion AdminLTE -->
+<div class="modal fade" id="adminLogoutModal" tabindex="-1" role="dialog" aria-labelledby="adminLogoutModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content" style="border-radius: 12px; overflow: hidden; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.15);">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title font-weight-bold" id="adminLogoutModalLabel">
+                    <i class="fas fa-sign-out-alt mr-2"></i> Confirmation de déconnexion
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Fermer">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="mb-2">Êtes-vous certain de vouloir quitter l'espace d'administration <strong>{{ config('app.name') }}</strong> ?</p>
+                <div class="alert alert-light border mb-0 text-muted small">
+                    <i class="fas fa-user-shield text-info mr-1"></i> Connecté en tant que <strong>{{ auth()->user()->name }}</strong> ({{ auth()->user()->email }}).
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-secondary px-3" data-dismiss="modal">
+                    <i class="fas fa-times mr-1"></i> Annuler
+                </button>
+                <form method="POST" action="{{ route('logout') }}" id="adminLogoutForm" class="m-0">
+                    @csrf
+                    <button type="submit" class="btn btn-danger font-weight-bold px-3" id="adminLogoutSubmitBtn">
+                        <i class="fas fa-sign-out-alt mr-1"></i> Se déconnecter
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.6.2/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('templates/backoffice/js/adminlte.min.js') }}"></script>
+<script>
+    document.getElementById('adminLogoutForm')?.addEventListener('submit', function() {
+        const btn = document.getElementById('adminLogoutSubmitBtn');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Déconnexion en cours...';
+        }
+    });
+</script>
 @stack('scripts')
 </body>
 </html>

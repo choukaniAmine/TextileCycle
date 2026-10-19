@@ -45,12 +45,31 @@ class AtelierController extends Controller
         $villes       = Atelier::actif()->distinct()->orderBy('ville')->pluck('ville');
         $typesServices = ['Reparation', 'Retouche', 'Transformation', 'Customisation', 'Upcycling'];
 
+        // Données géographiques pour la carte interactive Leaflet
+        $mapQuery = clone $query;
+        $ateliersGeo = $mapQuery->whereNotNull('latitude')->whereNotNull('longitude')->get()->map(function ($at) {
+            return [
+                'id'             => $at->id,
+                'nom'            => $at->nom,
+                'ville'          => $at->ville,
+                'adresse'        => $at->adresse,
+                'telephone'      => $at->telephone,
+                'latitude'       => (float) $at->latitude,
+                'longitude'      => (float) $at->longitude,
+                'moyenne_note'   => $at->moyenneNote(),
+                'nombre_avis'    => $at->nombreAvis(),
+                'services_count' => $at->services_count ?? $at->services()->where('disponible', true)->count(),
+                'url'            => route('ateliers.show', $at),
+                'image_url'      => $at->image ? asset('storage/' . $at->image) : null,
+            ];
+        })->values();
+
         // Statistiques globales pour la stats bar
         $totalAteliers = Atelier::actif()->count();
         $totalServices = Service::where('disponible', true)->count();
         $totalVilles   = Atelier::actif()->distinct('ville')->count('ville');
 
-        // Requête AJAX ou JSON → retourner JSON (HTML partiel + total + pagination)
+        // Requête AJAX ou JSON → retourner JSON (HTML partiel + total + pagination + géodonnées)
         if ($request->ajax() || $request->wantsJson()) {
             $html = '';
             foreach ($ateliers as $atelier) {
@@ -61,16 +80,18 @@ class AtelierController extends Controller
             }
 
             return response()->json([
-                'html'       => $html,
-                'total'      => $ateliers->total(),
-                'pagination' => $ateliers->links('pagination::bootstrap-5')->toHtml(),
+                'html'         => $html,
+                'total'        => $ateliers->total(),
+                'pagination'   => $ateliers->links('pagination::bootstrap-5')->toHtml(),
+                'ateliers_geo' => $ateliersGeo,
             ]);
         }
 
         return view('front.ateliers.index', compact(
             'ateliers', 'villes', 'typesServices',
             'search', 'ville', 'typeService',
-            'totalAteliers', 'totalServices', 'totalVilles'
+            'totalAteliers', 'totalServices', 'totalVilles',
+            'ateliersGeo'
         ));
     }
 

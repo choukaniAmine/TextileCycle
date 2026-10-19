@@ -24,6 +24,8 @@ class AtelierSeeder extends Seeder
                 'telephone' => '+216 71 234 567',
                 'email' => 'contact@ecostyle-atelier.tn',
                 'horaires' => 'Lun - Ven: 08h30 - 18h30 | Sam: 09h00 - 15h00',
+                'latitude' => 36.8002000,
+                'longitude' => 10.1805000,
                 'est_actif' => true,
                 'services' => [
                     [
@@ -66,6 +68,8 @@ class AtelierSeeder extends Seeder
                 'telephone' => '+216 22 987 654',
                 'email' => 'hello@upcyclelab.tn',
                 'horaires' => 'Mar - Sam: 10h00 - 19h00',
+                'latitude' => 36.8782000,
+                'longitude' => 10.3247000,
                 'est_actif' => true,
                 'services' => [
                     [
@@ -99,6 +103,8 @@ class AtelierSeeder extends Seeder
                 'telephone' => '+216 73 555 444',
                 'email' => 'maison.couture.sousse@gmail.com',
                 'horaires' => 'Lun - Sam: 09h00 - 19h00',
+                'latitude' => 35.8344000,
+                'longitude' => 10.6346000,
                 'est_actif' => true,
                 'services' => [
                     [
@@ -131,6 +137,8 @@ class AtelierSeeder extends Seeder
                 'telephone' => '+216 74 111 222',
                 'email' => 'contact@sfax-retouche.tn',
                 'horaires' => 'Lun - Ven: 08h00 - 17h30',
+                'latitude' => 34.7406000,
+                'longitude' => 10.7603000,
                 'est_actif' => true,
                 'services' => [
                     [

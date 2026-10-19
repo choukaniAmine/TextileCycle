@@ -68,8 +68,7 @@
             @endif
 
             <a href="{{ route('ateliers.show', $atelier) }}"
-               class="btn w-100 rounded-pill py-2 fw-semibold"
-               style="background:linear-gradient(135deg,#0f7038,#28c76f); color:#fff; border:none;">
+               class="btn btn-card-action w-100 rounded-pill py-2 fw-semibold">
                 Voir les services <i class="bi bi-arrow-right ms-1"></i>
             </a>
         </div>
