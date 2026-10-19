@@ -2,9 +2,10 @@
 
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\Atelier;
+use App\Http\Controllers\Admin\DonPriorityController;
 use App\Http\Controllers\Admin\CategorieController;
 use App\Http\Controllers\Admin\VetementController as AdminVetementController;
-
+use App\Http\Controllers\Front\DonSmartMatchController;
 use App\Http\Controllers\Front;
 use App\Http\Controllers\Front\DemandeDonController;
 use App\Http\Controllers\Front\MesVetementsController;
@@ -80,6 +81,7 @@ Route::middleware('auth')->group(function () {
     Route::post('/mes-dons', [Front\DonController::class, 'store'])->name('dons.store');
     Route::get('/mes-dons/{don}', [Front\DonController::class, 'show'])->name('dons.show');
     Route::delete('/mes-dons/{don}', [Front\DonController::class, 'destroy'])->name('dons.destroy');
+    Route::post('/api/dons/smart-match', DonSmartMatchController::class)->name('api.dons.smart-match');
 
     // Module 4 — Demandes (particulier / association)
     Route::middleware('role:particulier,association')->group(function () {
@@ -106,6 +108,7 @@ Route::middleware('auth')->group(function () {
 // Module 3 — Espace Association : traite les dons reçus
 Route::middleware(['auth', 'role:association'])->prefix('espace-association')->name('espace.')->group(function () {
     Route::get('/dons', [Front\ReceivedDonController::class, 'index'])->name('dons.index');
+   // Route::get('/dons/priority', [DonPriorityController::class, 'index'])->name('dons.priority');
     Route::patch('/dons/{don}/statut', [Front\ReceivedDonController::class, 'updateStatus'])->name('dons.status');
 });
 
@@ -131,7 +134,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
 
     // Module 3 — Associations & Dons
     Route::resource('associations', Admin\AssociationController::class);
+    Route::get('/dons/priority', [Admin\DonPriorityController::class, 'index'])->name('dons.priority');
     Route::resource('dons', Admin\DonController::class);
+ 
 
     // Module 4 — Demandes & Interventions
     Route::resource('demandes', Admin\DemandeController::class)->except(['create', 'store']);
