@@ -9,9 +9,7 @@ use App\Models\Demande;
 use App\Models\User;
 use App\Notifications\DemandeNotification;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-
 use Illuminate\Support\Facades\Notification;
-
 use Tests\TestCase;
 
 class DemandeTest extends TestCase
@@ -25,12 +23,12 @@ class DemandeTest extends TestCase
 
     private function client(): User
     {
-        return User::factory()->create();
+        // On ajoute le rôle particulier pour passer le middleware 'role:particulier,association'
+        return User::factory()->role(UserRole::Particulier)->create();
     }
 
     private function payload(array $overrides = []): array
     {
-        // On prend la première valeur valide de l'enum sans supposer son nom exact.
         $type = TypeDemande::cases()[0]->value;
 
         return array_merge([
@@ -47,8 +45,9 @@ class DemandeTest extends TestCase
         $user = $this->client();
         $atelier = $this->atelier();
 
+        // CORRECTION : /mes-demandes au lieu de /demandes
         $this->actingAs($user)
-            ->post('/demandes', $this->payload(['urgent' => 1]))
+            ->post('/mes-demandes', $this->payload(['urgent' => 1]))
             ->assertRedirect();
 
         $demande = $user->demandes()->first();
@@ -63,7 +62,8 @@ class DemandeTest extends TestCase
     public function test_demande_validation_rejects_bad_data(): void
     {
         $this->actingAs($this->client())
-            ->post('/demandes', [
+            // CORRECTION : /mes-demandes
+            ->post('/mes-demandes', [
                 'titre' => '',
                 'type' => 'inconnu',
                 'vetement' => '',
@@ -76,16 +76,16 @@ class DemandeTest extends TestCase
             ]);
     }
 
-   
     public function test_user_can_view_own_demande_but_not_others(): void
     {
         $user = $this->client();
         $demande = Demande::factory()->for($user)->create();
 
-        $this->actingAs($user)->get("/demandes/{$demande->id}")->assertOk();
+        // CORRECTION : /mes-demandes
+        $this->actingAs($user)->get("/mes-demandes/{$demande->id}")->assertOk();
 
         $other = $this->client();
-        $this->actingAs($other)->get("/demandes/{$demande->id}")->assertForbidden();
+        $this->actingAs($other)->get("/mes-demandes/{$demande->id}")->assertForbidden();
     }
 
     public function test_index_lists_only_own_demandes_with_status_filter(): void
@@ -95,13 +95,14 @@ class DemandeTest extends TestCase
         Demande::factory()->for($user)->create(['titre' => 'MA-DEMANDE-TERMINEE', 'statut' => Statut::Terminee]);
         Demande::factory()->create(['titre' => 'DEMANDE-DU-VOISIN', 'statut' => Statut::EnAttente]);
 
-        $this->actingAs($user)->get('/demandes')
+        // CORRECTION : /mes-demandes
+        $this->actingAs($user)->get('/mes-demandes')
             ->assertOk()
             ->assertSee('MA-DEMANDE-EN-ATTENTE')
             ->assertSee('MA-DEMANDE-TERMINEE')
             ->assertDontSee('DEMANDE-DU-VOISIN');
 
-        $this->actingAs($user)->get('/demandes?statut=' . Statut::EnAttente->value)
+        $this->actingAs($user)->get('/mes-demandes?statut=' . Statut::EnAttente->value)
             ->assertOk()
             ->assertSee('MA-DEMANDE-EN-ATTENTE')
             ->assertDontSee('MA-DEMANDE-TERMINEE');
@@ -113,8 +114,9 @@ class DemandeTest extends TestCase
         $user = $this->client();
         $demande = Demande::factory()->for($user)->create(['statut' => Statut::EnAttente]);
 
+        // CORRECTION : /mes-demandes
         $this->actingAs($user)
-            ->put("/demandes/{$demande->id}", $this->payload(['titre' => 'Titre modifié']))
+            ->put("/mes-demandes/{$demande->id}", $this->payload(['titre' => 'Titre modifié']))
             ->assertRedirect(route('demandes.show', $demande));
 
         $this->assertSame('Titre modifié', $demande->fresh()->titre);
@@ -125,8 +127,9 @@ class DemandeTest extends TestCase
         $user = $this->client();
         $demande = Demande::factory()->for($user)->create(['statut' => Statut::EnCours]);
 
+        // CORRECTION : /mes-demandes
         $this->actingAs($user)
-            ->put("/demandes/{$demande->id}", $this->payload(['titre' => 'Pirate']))
+            ->put("/mes-demandes/{$demande->id}", $this->payload(['titre' => 'Pirate']))
             ->assertForbidden();
 
         $this->assertNotSame('Pirate', $demande->fresh()->titre);
@@ -137,8 +140,9 @@ class DemandeTest extends TestCase
         $user = $this->client();
         $demande = Demande::factory()->for($user)->create(['statut' => Statut::EnCours]);
 
+        // CORRECTION : /mes-demandes
         $this->actingAs($user)
-            ->get("/demandes/{$demande->id}/edit")
+            ->get("/mes-demandes/{$demande->id}/edit")
             ->assertRedirect(route('demandes.show', $demande))
             ->assertSessionHas('error');
     }
@@ -148,8 +152,8 @@ class DemandeTest extends TestCase
         $user = $this->client();
         $demande = Demande::factory()->for($user)->create(['statut' => Statut::EnAttente]);
 
-        // Route définie par `public function cancel(...)` dans le contrôleur.
-        $this->actingAs($user)->patch("/demandes/{$demande->id}/annuler")
+        // CORRECTION : /mes-demandes/{id}/annuler
+        $this->actingAs($user)->patch("/mes-demandes/{$demande->id}/annuler")
             ->assertRedirect(route('demandes.index'))
             ->assertSessionHas('success');
 
@@ -161,18 +165,18 @@ class DemandeTest extends TestCase
         $user = $this->client();
         $demande = Demande::factory()->for($user)->create(['statut' => Statut::EnCours]);
 
-        $this->actingAs($user)->patch("/demandes/{$demande->id}/annuler")->assertForbidden();
+        // CORRECTION : /mes-demandes/{id}/annuler
+        $this->actingAs($user)->patch("/mes-demandes/{$demande->id}/annuler")->assertForbidden();
         $this->assertSame(Statut::EnCours, $demande->fresh()->statut);
     }
-
-    
 
     public function test_user_cannot_delete_non_deletable_demande(): void
     {
         $user = $this->client();
         $demande = Demande::factory()->for($user)->create(['statut' => Statut::Terminee]);
 
-        $this->actingAs($user)->delete("/demandes/{$demande->id}")->assertForbidden();
+        // CORRECTION : /mes-demandes
+        $this->actingAs($user)->delete("/mes-demandes/{$demande->id}")->assertForbidden();
         $this->assertDatabaseHas('demandes', ['id' => $demande->id]);
     }
 
@@ -181,16 +185,18 @@ class DemandeTest extends TestCase
         $intruder = $this->client();
         $demande = Demande::factory()->create(['statut' => Statut::EnAttente]);
 
-        $this->actingAs($intruder)->patch("/demandes/{$demande->id}/annuler")->assertForbidden();
-        $this->actingAs($intruder)->delete("/demandes/{$demande->id}")->assertForbidden();
-        $this->actingAs($intruder)->get("/demandes/{$demande->id}")->assertForbidden();
+        // CORRECTION : /mes-demandes
+        $this->actingAs($intruder)->patch("/mes-demandes/{$demande->id}/annuler")->assertForbidden();
+        $this->actingAs($intruder)->delete("/mes-demandes/{$demande->id}")->assertForbidden();
+        $this->actingAs($intruder)->get("/mes-demandes/{$demande->id}")->assertForbidden();
         $this->assertSame(Statut::EnAttente, $demande->fresh()->statut);
     }
 
     public function test_guest_is_redirected_to_login(): void
     {
-        $this->get('/demandes')->assertRedirect('/login');
-        $this->post('/demandes', $this->payload())->assertRedirect('/login');
+        // CORRECTION : /mes-demandes
+        $this->get('/mes-demandes')->assertRedirect('/login');
+        $this->post('/mes-demandes', $this->payload())->assertRedirect('/login');
     }
 
     public function test_ai_estimation_is_stored_on_create_and_recalculated_on_update(): void
@@ -198,7 +204,8 @@ class DemandeTest extends TestCase
         Notification::fake();
         $user = $this->client();
 
-        $this->actingAs($user)->post('/demandes', $this->payload([
+        // CORRECTION : /mes-demandes
+        $this->actingAs($user)->post('/mes-demandes', $this->payload([
             'categorie_vetement' => array_key_first(config('repair.categories')) ?? null,
             'type_intervention' => array_key_first(config('repair.interventions')) ?? null,
             'niveau_difficulte' => 2,
@@ -208,14 +215,13 @@ class DemandeTest extends TestCase
         $demande = $user->demandes()->first();
         $this->assertNotNull($demande);
 
-        // L'estimateur IA remplit `duree_estimee_min` ET `estimation` (cf. casts du modèle).
         $this->assertTrue(
             $demande->duree_estimee_min !== null || $demande->estimation !== null,
             "L'estimation IA devrait renseigner `duree_estimee_min` ou `estimation` sur la demande."
         );
 
-        // Mise à jour : l'estimation doit être recalculée sans erreur.
-        $this->actingAs($user)->put("/demandes/{$demande->id}", $this->payload([
+        // CORRECTION : /mes-demandes
+        $this->actingAs($user)->put("/mes-demandes/{$demande->id}", $this->payload([
             'titre' => 'Retouche maj',
             'niveau_difficulte' => 3,
         ]))->assertRedirect();
@@ -225,6 +231,7 @@ class DemandeTest extends TestCase
 
     public function test_create_page_renders(): void
     {
-        $this->actingAs($this->client())->get('/demandes/create')->assertOk();
+        // CORRECTION : /mes-demandes/create
+        $this->actingAs($this->client())->get('/mes-demandes/create')->assertOk();
     }
 }
