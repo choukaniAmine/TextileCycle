@@ -11,7 +11,8 @@ RUN composer install \
     --no-interaction \
     --prefer-dist \
     --optimize-autoloader \
-    --no-scripts
+    --no-scripts \
+    --ignore-platform-reqs
 
 # Stage 2: Build frontend assets
 FROM node:20-alpine AS frontend
@@ -25,7 +26,7 @@ COPY public/ public/
 RUN npm ci && npm run build
 
 # Stage 3: Production runtime
-FROM php:8.2-apache AS production
+FROM php:8.3-apache AS production
 
 WORKDIR /var/www/html
 
@@ -34,23 +35,36 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libicu-dev \
     libxml2-dev \
     libzip-dev \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    libonig-dev \
     unzip \
-    && docker-php-ext-install \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
         pdo_mysql \
         bcmath \
         opcache \
-        mbstring \
         intl \
         zip \
-        xml \
+        gd \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure Apache for Laravel (and change port to 8080 for K8s)
+# Configure Apache for Laravel (port 8080 + AllowOverride All for .htaccess)
 RUN a2enmod rewrite \
-    && sed -ri 's!/var/www/html!/var/www/html/public!g' /etc/apache2/sites-available/000-default.conf \
-    && sed -ri 's!/var/www/!/var/www/html/public!g' /etc/apache2/apache2.conf \
-    && sed -ri 's/Listen 80/Listen 8080/g' /etc/apache2/ports.conf \
-    && sed -ri 's/:80>/:8080>/g' /etc/apache2/sites-available/000-default.conf
+    && sed -i 's/Listen 80/Listen 8080/g' /etc/apache2/ports.conf
+
+# Write a clean VirtualHost config with correct DocumentRoot and AllowOverride
+RUN printf '<VirtualHost *:8080>\n\
+    DocumentRoot /var/www/html/public\n\
+    <Directory /var/www/html/public>\n\
+        AllowOverride All\n\
+        Require all granted\n\
+        Options -Indexes +FollowSymLinks\n\
+    </Directory>\n\
+    ErrorLog ${APACHE_LOG_DIR}/error.log\n\
+    CustomLog ${APACHE_LOG_DIR}/access.log combined\n\
+</VirtualHost>\n' > /etc/apache2/sites-available/000-default.conf
 
 # Copy application
 COPY . .
