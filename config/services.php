@@ -34,14 +34,11 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-    'gemini' => [
-    'key' => env('GEMINI_API_KEY'),
-    'model' => env('GEMINI_MODEL', 'gemini-flash-latest'),
-],
-
-    'gemini' => [
-        'api_key' => env('GEMINI_API_KEY'),
-        'model' => env('GEMINI_MODEL', 'gemini-flash-lite-latest'),
+        'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+        'api_key' => env('GEMINI_API_KEY'), // alias utilisé par le code de l'autre branche
+        'model' => env('GEMINI_MODEL', 'gemini-3.5-flash-lite'),
+        'fallback_model' => env('GEMINI_FALLBACK_MODEL'),
     ],
 
 ];
