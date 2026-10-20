@@ -192,5 +192,8 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('templates/frontoffice/js/scripts.js') }}"></script>
 @stack('scripts')
+@auth
+    @include('partials.chatbot')
+@endauth
 </body>
 </html>
