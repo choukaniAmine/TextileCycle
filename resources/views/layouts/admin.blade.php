@@ -87,6 +87,9 @@
                         <a href="{{ route('admin.categories.index') }}" class="nav-link {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
                             <i class="nav-icon fas fa-tags"></i><p>Catégories</p></a>
                     </li>
+                    <a href="{{ route('admin.vetements.statistiques') }}" class="btn btn-info">
+    <i class="fas fa-chart-pie"></i> Statistiques
+</a>
 
                     {{-- Prochains modules : Réparations, Dons… --}}
                 </ul>

@@ -260,5 +260,8 @@
 </script>
 @endauth
 @stack('scripts')
+@auth
+    @include('partials.chatbot')
+@endauth
 </body>
 </html>

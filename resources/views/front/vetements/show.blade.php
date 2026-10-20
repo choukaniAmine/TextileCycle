@@ -88,7 +88,24 @@
                             @endif
                         @endauth
                     @endif
-
+@auth
+    @if($vetement->type === \App\Enums\TypeVetement::Transformation || $vetement->etat === \App\Enums\EtatVetement::Use)
+        <div class="mt-4 p-3 rounded-4" style="background: var(--rf-green-soft);">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+                <div>
+                    <h6 class="fw-bold mb-0">♻️ Idées de seconde vie</h6>
+                    <small class="text-muted">3 idées d'upcycling générées par l'IA</small>
+                </div>
+                <button type="button" id="btnIdees" class="btn btn-primary btn-sm"
+                        data-url="{{ route('vetements.idees', $vetement) }}"
+                        data-token="{{ csrf_token() }}">
+                    <i class="bi bi-lightbulb"></i> Voir les idées
+                </button>
+            </div>
+            <div id="ideesBox" class="mt-3 d-grid gap-3"></div>
+        </div>
+    @endif
+@endauth
                     <a href="{{ route('vetements.index') }}" class="btn btn-outline-secondary mt-4">
                         <i class="bi bi-arrow-left"></i> Retour aux vêtements
                     </a>
@@ -98,3 +115,50 @@
     </div>
 </section>
 @endsection
+@push('scripts')
+<script>
+document.getElementById('btnIdees')?.addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    const box = document.getElementById('ideesBox');
+    const old = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Réflexion...';
+    box.replaceChildren();
+
+    const el = (tag, cls, text) => {
+        const n = document.createElement(tag);
+        if (cls) n.className = cls;
+        if (text) n.textContent = text;
+        return n;
+    };
+    const couleurs = { facile: 'success', moyen: 'warning', difficile: 'danger' };
+
+    try {
+        const r = await fetch(btn.dataset.url, {
+            method: 'POST',
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': btn.dataset.token },
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.message || 'Erreur IA');
+
+        d.idees.forEach((i) => {
+            const card = el('div', 'bg-white rounded-4 p-3 shadow-sm');
+            card.appendChild(el('div', 'fw-bold', i.titre));
+            card.appendChild(el('p', 'small text-muted mb-2', i.description));
+            const meta = el('div', 'd-flex flex-wrap gap-2 align-items-center small');
+            meta.appendChild(el('span', 'badge bg-' + couleurs[i.difficulte], i.difficulte));
+            if (i.duree) meta.appendChild(el('span', '', '⏱ ' + i.duree));
+            card.appendChild(meta);
+            if (i.materiel.length) card.appendChild(el('div', 'small mt-2', '🧵 ' + i.materiel.join(', ')));
+            box.appendChild(card);
+        });
+        btn.classList.replace('btn-primary', 'btn-outline-primary');
+    } catch (err) {
+        box.appendChild(el('div', 'alert alert-danger mb-0', err.message));
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = old;
+    }
+});
+</script>
+@endpush

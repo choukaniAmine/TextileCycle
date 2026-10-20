@@ -11,7 +11,8 @@ use App\Http\Controllers\Front\DemandeDonController;
 use App\Http\Controllers\Front\MesVetementsController;
 use App\Http\Controllers\Front\VetementController as FrontVetementController;
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Front\VetementAiController;
+use App\Http\Controllers\Front\VetementChatController;
 // ==========================================
 // 1. FRONT OFFICE — ROUTES PUBLIQUES
 // ==========================================
@@ -50,17 +51,30 @@ Route::middleware('auth')->group(function () {
     Route::put('/profil', [Front\ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profil/avatar', [Front\ProfileController::class, 'destroyAvatar'])->name('profile.avatar.destroy');
     Route::delete('/profil', [Front\ProfileController::class, 'destroyAccount'])->name('profile.destroy');
+    
 
     // Notifications (tous les rôles)
     Route::get('notifications', [Front\NotificationController::class, 'index'])->name('notifications.index');
     Route::get('notifications/{id}', [Front\NotificationController::class, 'read'])->name('notifications.read');
     Route::post('notifications/lues', [Front\NotificationController::class, 'readAll'])->name('notifications.readAll');
 
+    // IA — Idées de seconde vie (tout utilisateur connecté, fiche détail d'un vêtement)
+    Route::post('/vetements/{vetement}/idees', [VetementAiController::class, 'idees'])
+        ->middleware('throttle:10,1')->name('vetements.idees');
+    // IA — Assistant conversationnel (function calling)
+    Route::post('/assistant/chat', [VetementChatController::class, 'message'])
+        ->middleware('throttle:15,1')->name('assistant.chat');
     // Module 1 — Espace particulier (vêtements + demandes de don)
     Route::middleware('role:particulier')->group(function () {
         Route::resource('mes-vetements', MesVetementsController::class)
             ->except('show')
             ->parameters(['mes-vetements' => 'vetement']);
+
+        // IA — Analyse de la photo + amélioration de la description (formulaire vêtement)
+        Route::post('/ia/analyser-photo', [VetementAiController::class, 'analyser'])
+            ->middleware('throttle:10,1')->name('ia.analyser');
+        Route::post('/ia/ameliorer-description', [VetementAiController::class, 'description'])
+            ->middleware('throttle:10,1')->name('ia.description');
 
         Route::post('/vetements/{vetement}/demander', [DemandeDonController::class, 'store'])->name('demandes-don.store');
         Route::get('/mes-dons-demandes/recues', [DemandeDonController::class, 'recues'])->name('demandes-don.recues');
@@ -127,10 +141,24 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::patch('users/{user}/toggle', [Admin\UserController::class, 'toggle'])->name('users.toggle');
     Route::resource('users', Admin\UserController::class)->except('show');
 
-    // Module 1 — Vêtements et catégories
+        // Module 1 — Vêtements et catégories
     Route::resource('categories', CategorieController::class)
         ->except('show')
         ->parameters(['categories' => 'categorie']);
+    Route::get('vetements/statistiques', [AdminVetementController::class, 'statistiques'])->name('vetements.statistiques');
+    Route::get('vetements/export/pdf', [AdminVetementController::class, 'exportPdf'])->name('vetements.export.pdf');
+    Route::get('vetements/export/excel', [AdminVetementController::class, 'exportExcel'])->name('vetements.export.excel');
+    Route::get('vetements/etiquettes', [AdminVetementController::class, 'etiquettes'])->name('vetements.etiquettes');
+    Route::get('vetements/import', [AdminVetementController::class, 'importForm'])->name('vetements.import');
+    Route::get('vetements/import/modele', [AdminVetementController::class, 'importModele'])->name('vetements.import.modele');
+    Route::post('vetements/import', [AdminVetementController::class, 'importStore'])->name('vetements.import.store');
+    Route::get('vetements/{vetement}/etiquette', [AdminVetementController::class, 'etiquette'])->name('vetements.etiquette');
+
+    Route::resource('vetements', AdminVetementController::class)->except('show');
+    // Statistiques (doit être AVANT le resource, sinon "statistiques" est pris pour un {vetement})
+    Route::get('vetements/statistiques', [AdminVetementController::class, 'statistiques'])
+        ->name('vetements.statistiques');
+
     Route::resource('vetements', AdminVetementController::class)->except('show');
 
     // Module 2 — Ateliers & Services
