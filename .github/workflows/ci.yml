@@ -9,14 +9,13 @@ on:
       - final_integration_v1
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
 
 env:
-  # Pas de fichier .env dans le dépôt : tout passe par des variables d'environnement
   APP_ENV: testing
   APP_KEY: base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
 
@@ -57,13 +56,8 @@ jobs:
   # 2. TESTS AUTOMATISÉS (PHPUNIT) ET BUILD FRONTEND (VITE)
   # ========================================================
   tests:
-    name: Tests & Build (PHP ${{ matrix.php }})
+    name: Tests & Build
     runs-on: ubuntu-latest
-
-    strategy:
-      fail-fast: false
-      matrix:
-        php: ['8.3']
 
     services:
       mysql:
@@ -86,7 +80,6 @@ jobs:
       DB_DATABASE: textilecycle_testing
       DB_USERNAME: root
       DB_PASSWORD: root
-      # Aucun appel réel aux services d'IA en CI
       XAI_API_KEY: ci-dummy-key
       ML_SERVICE_URL: http://127.0.0.1:8001
 
@@ -94,10 +87,10 @@ jobs:
       - name: Checkout du code
         uses: actions/checkout@v4
 
-      - name: Configuration de PHP ${{ matrix.php }}
+      - name: Configuration de PHP 8.3
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php }}
+          php-version: '8.3'
           extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, bcmath, gd, curl, zip
           coverage: none
 
@@ -105,9 +98,9 @@ jobs:
         uses: actions/cache@v4
         with:
           path: vendor
-          key: ${{ runner.os }}-composer-${{ matrix.php }}-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-composer-8.3-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
-            ${{ runner.os }}-composer-${{ matrix.php }}-
+            ${{ runner.os }}-composer-8.3-
 
       - name: Installer les dépendances Composer
         run: composer install --prefer-dist --no-interaction --no-progress
