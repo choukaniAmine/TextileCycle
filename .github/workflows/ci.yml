@@ -123,3 +123,13 @@ jobs:
 
       - name: Exécuter les tests automatisés
         run: php artisan test --compact
+
+  # ========================================================
+  # 3. APPEL DU WORKFLOW CD (DÉPLOIEMENT AUTOMATIQUE)
+  # ========================================================
+  call-cd:
+    name: Continuous Deployment
+    needs: [phpstan, tests]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/final_integration_v1'
+    uses: ./.github/workflows/cd.yml
+    secrets: inherit

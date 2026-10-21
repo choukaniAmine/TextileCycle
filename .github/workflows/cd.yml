@@ -1,37 +1,17 @@
 name: CD Pipeline
 
 on:
-  workflow_run:
-    workflows: ["CI Pipeline"]
-    types:
-      - completed
-    branches:
-      - final_integration_v1
-  workflow_dispatch: # Permet aussi de déclencher le déploiement manuellement si besoin
-
-concurrency:
-  group: cd-${{ github.ref }}
-  cancel-in-progress: false
-
-permissions:
-  contents: read
+  workflow_call:
+  workflow_dispatch:
 
 jobs:
-  # ========================================================
-  # DÉPLOIEMENT : BUILD DOCKER & DÉPLOIEMENT SUR AZURE AKS
-  # ========================================================
   deploy:
     name: Build Docker & Deploy to AKS
     runs-on: ubuntu-latest
-    # Ne se lance que si la CI a réussi (ou déclenchement manuel)
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout du code
         uses: actions/checkout@v4
-        with:
-          # Récupère le commit exact qui a déclenché la CI
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Configuration de Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -50,7 +30,7 @@ jobs:
           push: true
           tags: |
             ${{ secrets.DOCKERHUB_USERNAME }}/textilecycle:latest
-            ${{ secrets.DOCKERHUB_USERNAME }}/textilecycle:${{ github.event.workflow_run.head_sha || github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/textilecycle:${{ github.sha }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
