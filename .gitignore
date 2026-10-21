@@ -5,6 +5,8 @@
 .env.backup
 .env.production
 .phpactor.json
+*.sql
+textilecycle_backup.sql
 .phpunit.result.cache
 /.fleet
 /.idea
