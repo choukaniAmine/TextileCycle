@@ -40,6 +40,20 @@ jobs:
           method: kubeconfig
           kubeconfig: ${{ secrets.KUBE_CONFIG }}
 
+      - name: Générer k8s/secret.yaml avec les secrets GitHub
+        env:
+          APP_KEY: "base64:0FHtwAyEs/WYYtq6xvlGD3g16XVmZ564EJZnmIUoBcI="
+          DB_PASSWORD: ""
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD || 'hynzxijrxfvcneil' }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+        run: |
+          sed -i "s|\${APP_KEY}|$APP_KEY|g" k8s/secret.yaml
+          sed -i "s|\${DB_PASSWORD}|$DB_PASSWORD|g" k8s/secret.yaml
+          sed -i "s|\${MAIL_PASSWORD}|$MAIL_PASSWORD|g" k8s/secret.yaml
+          sed -i "s|\${GEMINI_API_KEY}|$GEMINI_API_KEY|g" k8s/secret.yaml
+          sed -i "s|\${XAI_API_KEY}|$XAI_API_KEY|g" k8s/secret.yaml
+
       - name: Déploiement des manifests sur Kubernetes
         run: |
           kubectl apply -f k8s/secret.yaml

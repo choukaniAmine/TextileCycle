@@ -12,7 +12,7 @@ services:
       APP_NAME: "ReFashion"
       APP_ENV: local
       APP_DEBUG: "true"
-      APP_KEY: "base64:0FHtwAyEs/WYYtq6xvlGD3g16XVmZ564EJZnmIUoBcI="
+      APP_KEY: "${APP_KEY:-base64:0FHtwAyEs/WYYtq6xvlGD3g16XVmZ564EJZnmIUoBcI=}"
       APP_URL: "http://localhost:8080"
       DB_CONNECTION: mysql
       DB_HOST: mysql
@@ -22,6 +22,17 @@ services:
       DB_PASSWORD: ""
       SESSION_DRIVER: database
       CACHE_STORE: database
+
+      # Services IA & Machine Learning (lus depuis votre .env local)
+      GEMINI_API_KEY: "${GEMINI_API_KEY}"
+      GEMINI_MODEL: "${GEMINI_MODEL:-gemini-3.5-flash-lite}"
+      GEMINI_FALLBACK_MODEL: "${GEMINI_FALLBACK_MODEL:-gemini-3.5-flash}"
+      ML_SERVICE_URL: "${ML_SERVICE_URL:-https://estimation0heure.vercel.app/}"
+      ML_PYTHON_BIN: "${ML_PYTHON_BIN:-python}"
+      XAI_API_KEY: "${XAI_API_KEY}"
+      XAI_BASE_URL: "${XAI_BASE_URL:-https://api.groq.com/openai/v1}"
+      XAI_MODEL: "${XAI_MODEL:-openai/gpt-oss-120b}"
+      XAI_TIMEOUT: "${XAI_TIMEOUT:-60}"
     depends_on:
       mysql:
         condition: service_healthy
