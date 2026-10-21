@@ -8,5 +8,4 @@ parameters:
     # Niveau d'analyse (0 à 9, niveau 1 pour la CI)
     level: 1
 
-    ignoreErrors:
-        - '#Undefined variable: \$this#'
+    reportUnmatchedIgnoredErrors: false
